@@ -129,12 +129,11 @@
     <ClCompile Include="defaults\defaultpolicies.cpp" />
     <ClCompile Include="source.cpp" />
     <ClCompile Include="systems\bulletsystem.cpp" />
-    <ClCompile Include="systems\camerafollowsystem.cpp" />
     <ClCompile Include="systems\enemysystem.cpp" />
     <ClCompile Include="systems\gamesystem.cpp" />
     <ClCompile Include="systems\gui_test.cpp" />
     <ClCompile Include="systems\physicssystem.cpp" />
-    <ClCompile Include="systems\shipsystem.cpp" />
+    <ClCompile Include="systems\playersystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="autogen\autogen.hpp" />
@@ -159,7 +158,6 @@
     <ClInclude Include="renderstages\mousehover.hpp" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="systems\bulletsystem.hpp" />
-    <ClInclude Include="systems\camerafollowsystem.hpp" />
     <ClInclude Include="systems\CustomSystem.hpp">
       <SubType>
       </SubType>
@@ -168,7 +166,7 @@
     <ClInclude Include="systems\gamesystem.hpp" />
     <ClInclude Include="systems\gui_test.hpp" />
     <ClInclude Include="systems\physicssystem.hpp" />
-    <ClInclude Include="systems\shipsystem.hpp" />
+    <ClInclude Include="systems\playersystem.hpp" />
     <ClInclude Include="systems\pointcloud_particlesystem.hpp" />
     <ClInclude Include="data\pp_blur.hpp" />
   </ItemGroup>

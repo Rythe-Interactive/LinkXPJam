@@ -45,10 +45,7 @@
     <ClCompile Include="broadphase\broadphase.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="systems\camerafollowsystem.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="systems\shipsystem.cpp">
+    <ClCompile Include="systems\playersystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -140,10 +137,7 @@
     <ClInclude Include="components\camerafollowcomp.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="systems\camerafollowsystem.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="systems\shipsystem.hpp">
+    <ClInclude Include="systems\playersystem.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

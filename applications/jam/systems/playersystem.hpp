@@ -7,18 +7,18 @@
 #include "../components/components.hpp"
 
 using namespace lgn;
-class ShipSystem final : public legion::System<ShipSystem>
+class PlayerSystem final : public legion::System<PlayerSystem>
 {
-    ecs::filter<position, rotation, scale, rigidbody, ship_comp > ships;
+    ecs::filter<position, rotation, scale, rigidbody> players;
     ecs::filter<position, rotation, scale, rendering::camera, rigidbody> cameras;
 
-    ecs::entity ship;
+    ecs::entity player;
     ecs::entity camera;
 public:
     void setup();
     void fixedUpdate(lgn::time::span);
     void shutdown()
     {
-        lgn::log::debug("ShipSystem shutdown");
+        lgn::log::debug("PlayerSystem shutdown");
     }
 };
