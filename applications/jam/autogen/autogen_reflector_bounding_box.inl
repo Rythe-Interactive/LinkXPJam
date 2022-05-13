@@ -1,5 +1,5 @@
 #include "autogen_reflector_bounding_box.hpp"
-#include "../../jam/data/bounding_box.hpp"
+#include "../../jam/module/../systems/../data/bounding_box.hpp"
 namespace legion { using namespace core; }
 namespace legion::core
 {

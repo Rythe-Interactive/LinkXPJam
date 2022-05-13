@@ -16,6 +16,7 @@ namespace legion::core
         refl.members.emplace("damge", member_reference("damge", primitive_reference{typeHash(obj.damge), &obj.damge}));
         refl.members.emplace("lifetime", member_reference("lifetime", primitive_reference{typeHash(obj.lifetime), &obj.lifetime}));
         refl.members.emplace("age", member_reference("age", primitive_reference{typeHash(obj.age), &obj.age}));
+        refl.members.emplace("fromPlayer", member_reference("fromPlayer", primitive_reference{typeHash(obj.fromPlayer), &obj.fromPlayer}));
         refl.data = std::addressof(obj);
         return refl;
     }
@@ -33,6 +34,7 @@ namespace legion::core
         refl.members.emplace("damge", member_reference("damge", primitive_reference{typeHash(obj.damge), &obj.damge}));
         refl.members.emplace("lifetime", member_reference("lifetime", primitive_reference{typeHash(obj.lifetime), &obj.lifetime}));
         refl.members.emplace("age", member_reference("age", primitive_reference{typeHash(obj.age), &obj.age}));
+        refl.members.emplace("fromPlayer", member_reference("fromPlayer", primitive_reference{typeHash(obj.fromPlayer), &obj.fromPlayer}));
         refl.data = reinterpret_cast<void*>(address);
         return refl;
     }

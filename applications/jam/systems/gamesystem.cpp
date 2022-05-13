@@ -64,13 +64,6 @@ void GameSystem::setup()
             gfx::MaterialCache::get_material("ShipLit").set_param("metallicTex", metallic);
             gfx::MaterialCache::get_material("ShipLit").set_param("useMetallicTex", true);
         }
-
-        camera = createEntity("Camera");
-        camera.add_component<transform>(position(0.f, 0.f, 0.f), rotation::lookat(position(0.f, 0.f, 0.f), position(0.f, 0.0, 4.f)), scale());
-        camera.add_component<audio::audio_listener>();
-        rendering::camera cam;
-        cam.set_projection(60.f, 0.001f, 1000.f);
-        camera.add_component<gfx::camera>(cam);
     }
 
 
