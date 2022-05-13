@@ -1,0 +1,42 @@
+#version 450
+#state CULL OFF
+#state DEPTH_WRITE OFF
+#state BLEND TRANSPARENT
+
+generate(vertex, fragment)
+
+#include <stdio.shinc>
+#include <utils.shinc>
+#include <math_ext.shinc>
+
+variant(depth_only)
+{
+    #define DEPTH_ONLY
+    #state DEPTH_WRITE ON
+}
+
+shader(vertex)
+{
+    void main(void)
+    {
+        gl_Position = FixedSizeBillboardModelToScreenSpacePosition(position);
+        PropagateStdIO();
+    }
+}
+
+shader(fragment)
+{
+    //uniform vec2 crosshairScale;
+    uniform sampler2D _texture;
+
+    void main(void)
+    {
+        vec4 color = texture(_texture, stdio(uv));
+
+        #if defined(DEPTH_ONLY)
+            fragment_color = vec4(0.0);
+        #else 
+            fragment_color = color;
+        #endif
+    }
+}
