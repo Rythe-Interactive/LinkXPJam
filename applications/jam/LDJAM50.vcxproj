@@ -16,7 +16,7 @@
     <ProjectGuid>{c578d912-3beb-4ee1-8aa1-e9eacf7ca441}</ProjectGuid>
     <RootNamespace>testgame</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>LDJAM50</ProjectName>
+    <ProjectName>LINKXPJAM</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">

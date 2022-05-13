@@ -47,26 +47,27 @@ void GameSystem::setup()
             audio::AudioSegmentCache::createAudioSegment("BGMusic", fs::view("assets://audio/background.mp3"));
         }
 
-        //{
-        //    gfx::MaterialCache::create_material("ShipLit", fs::view("engine://shaders/default_lit.shs"));
-        //    texture_import_settings settings = gfx::default_texture_settings;
-        //    settings.mag = gfx::texture_mipmap::nearest;
-        //    auto color = gfx::TextureCache::create_texture(fs::view("assets://textures/ship/ColorPalette.png"), settings);
-        //    auto emissive = gfx::TextureCache::create_texture(fs::view("assets://textures/ship/EmissivePallete.png"), settings);
-        //    auto metallic = gfx::TextureCache::create_texture(fs::view("assets://textures/ship/MetallicPalette.png"), settings);
-        //    auto roughness = gfx::TextureCache::create_texture(fs::view("assets://textures/ship/RoughnessPalette.png"), settings);
-        //    gfx::MaterialCache::get_material("ShipLit").set_param("albedoTex", color);
-        //    gfx::MaterialCache::get_material("ShipLit").set_param("useAlbedoTex", true);
-        //    gfx::MaterialCache::get_material("ShipLit").set_param("emissiveTex", emissive);
-        //    gfx::MaterialCache::get_material("ShipLit").set_param("useEmissiveTex", true);
-        //    gfx::MaterialCache::get_material("ShipLit").set_param("roughnessTex", roughness);
-        //    gfx::MaterialCache::get_material("ShipLit").set_param("useRoughnessTex", true);
-        //    gfx::MaterialCache::get_material("ShipLit").set_param("metallicTex", metallic);
-        //    gfx::MaterialCache::get_material("ShipLit").set_param("useMetallicTex", true);
-        //}
+        {
+            gfx::MaterialCache::create_material("ShipLit", fs::view("engine://shaders/default_lit.shs"));
+            texture_import_settings settings = gfx::default_texture_settings;
+            settings.mag = gfx::texture_mipmap::nearest;
+            auto color = gfx::TextureCache::create_texture(fs::view("assets://textures/ship/ColorPalette.png"), settings);
+            auto emissive = gfx::TextureCache::create_texture(fs::view("assets://textures/ship/EmissivePallete.png"), settings);
+            auto metallic = gfx::TextureCache::create_texture(fs::view("assets://textures/ship/MetallicPalette.png"), settings);
+            auto roughness = gfx::TextureCache::create_texture(fs::view("assets://textures/ship/RoughnessPalette.png"), settings);
+            gfx::MaterialCache::get_material("ShipLit").set_param("albedoTex", color);
+            gfx::MaterialCache::get_material("ShipLit").set_param("useAlbedoTex", true);
+            gfx::MaterialCache::get_material("ShipLit").set_param("emissiveTex", emissive);
+            gfx::MaterialCache::get_material("ShipLit").set_param("useEmissiveTex", true);
+            gfx::MaterialCache::get_material("ShipLit").set_param("roughnessTex", roughness);
+            gfx::MaterialCache::get_material("ShipLit").set_param("useRoughnessTex", true);
+            gfx::MaterialCache::get_material("ShipLit").set_param("metallicTex", metallic);
+            gfx::MaterialCache::get_material("ShipLit").set_param("useMetallicTex", true);
+        }
 
         camera = createEntity("Camera");
-        camera.add_component<transform>(position(0.f, 10.f, 0.f), rotation::lookat(position(0.f, 10.f, 0.f), position(0.f, 0.f, 0.f)), scale());
+        camera.add_component<transform>(position(0.f, 0.f, 0.f), rotation::lookat(position(0.f, 0.f, 0.f), position(0.f, 0.0, 4.f)), scale());
+        camera.add_component<audio::audio_listener>();
         rendering::camera cam;
         cam.set_projection(60.f, 0.001f, 1000.f);
         camera.add_component<gfx::camera>(cam);
@@ -75,12 +76,28 @@ void GameSystem::setup()
 
 
     bindToEvent<collision, &GameSystem::onCollision>();
-    createProcess<&GameSystem::fixedUpdate>("Update", 0.02f);
+    createProcess<&GameSystem::fixedUpdate>("Update", 0.2f);
 }
 
 void GameSystem::fixedUpdate(lgn::time::span deltaTime)
 {
+    //ecs::filter<position, rotation, scale, audio::audio_source> filter;
+    //for (auto src_ent : filter)
+    //{
+    //    auto src = src_ent.get_component<audio::audio_source>();
+    //    if (src->isStopped())
+    //    {
+    //        src_ent.destroy();
+    //    }
+    //}
 
+    //for (int i = 0; i < 50; i++)
+    //{
+    //    auto ent = createEntity();
+    //    ent.add_component<transform>();
+    //    auto src = ent.add_component<audio::audio_source>(audio::AudioSegmentCache::getAudioSegment("LaserShot"));
+    //    src->play();
+    //}
 }
 
 void GameSystem::onGUI(app::window& context, L_MAYBEUNUSED gfx::camera& cam, L_MAYBEUNUSED const gfx::camera::camera_input& camInput, time::span deltaTime)

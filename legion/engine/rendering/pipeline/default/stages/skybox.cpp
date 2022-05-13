@@ -16,7 +16,7 @@ namespace legion::rendering
         static id_type entityBufferId = nameHash("entity id buffer");
         static id_type flipbookBufferId = nameHash("flipbook frame buffer");
         static id_type mainId = nameHash("main");
-        static auto modelHandle = rendering::ModelCache::create_model("Cube", fs::view("assets://models/cube.glb"));
+
 
         if (filter.empty())
             return;
@@ -30,7 +30,6 @@ namespace legion::rendering
         }
 
         app::context_guard guard(context);
-
         auto [valid, message] = fbo->verify();
         if (!valid)
         {
@@ -41,6 +40,7 @@ namespace legion::rendering
 
         auto material = filter.at(0).get_component<skybox_renderer>()->material;
 
+        static auto modelHandle = rendering::ModelCache::create_model("Cube", fs::view("assets://models/cube.glb"));
         const model& mesh = modelHandle.get_model();
 
         buffer* modelMatrixBuffer = get_meta<buffer>(matricesId);
