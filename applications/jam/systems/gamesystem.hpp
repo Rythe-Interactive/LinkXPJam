@@ -30,13 +30,11 @@ struct exit_action : public lgn::app::input_action<exit_action> {};
 struct restart_action : public lgn::app::input_action<restart_action> {};
 
 struct fullscreen_action : public lgn::app::input_action<fullscreen_action> {};
-struct escape_cursor_action : public lgn::app::input_action<escape_cursor_action> {};
 struct vsync_action : public lgn::app::input_action<vsync_action> {};
 
 class GameSystem final : public legion::System<GameSystem>
 {
 public:
-    lgn::ecs::entity camera;
     lgn::ecs::entity player;
     
     float score = 0;

@@ -16,6 +16,7 @@ namespace legion::core
         prot.members.emplace("damge", member_value("damge", primitive_value{typeHash(obj.damge), std::any(obj.damge)}));
         prot.members.emplace("lifetime", member_value("lifetime", primitive_value{typeHash(obj.lifetime), std::any(obj.lifetime)}));
         prot.members.emplace("age", member_value("age", primitive_value{typeHash(obj.age), std::any(obj.age)}));
+        prot.members.emplace("fromPlayer", member_value("fromPlayer", primitive_value{typeHash(obj.fromPlayer), std::any(obj.fromPlayer)}));
         return prot;
     }
 }
