@@ -72,13 +72,13 @@ void GameSystem::setup()
         camera.add_component<gfx::camera>(cam);
     }
 
-    for (int i = 0; i < 512; i++)
-    {
-        auto ent = createEntity();
-        ent.add_component<transform>();
-        auto src = ent.add_component<audio::audio_source>(audio::AudioSegmentCache::getAudioSegment("LaserShot"));
-        src->play();
-    }
+    //for (int i = 0; i < 512; i++)
+    //{
+    //    auto ent = createEntity();
+    //    ent.add_component<transform>();
+    //    auto src = ent.add_component<audio::audio_source>(audio::AudioSegmentCache::getAudioSegment("LaserShot"));
+    //    src->play();
+    //}
 
     bindToEvent<collision, &GameSystem::onCollision>();
     createProcess<&GameSystem::fixedUpdate>("Update", 0.2f);

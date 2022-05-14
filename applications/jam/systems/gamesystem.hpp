@@ -16,15 +16,8 @@ struct switch_skybox_action : public lgn::app::input_action<switch_skybox_action
 struct auto_exposure_action : public lgn::app::input_action<auto_exposure_action> {};
 struct reload_shaders_action : public lgn::app::input_action<reload_shaders_action> {};
 
-struct player_pitch : public lgn::app::input_axis<player_pitch> {};
-struct player_roll : public lgn::app::input_axis<player_roll> {};
-struct player_yaw : public lgn::app::input_axis<player_yaw> {};
-struct player_thrust : public lgn::app::input_axis<player_thrust> {};
 struct player_shoot : public lgn::app::input_action<player_shoot> {};
-struct player_strafe : public lgn::app::input_axis<player_strafe> {};
-struct player_vertical : public lgn::app::input_axis<player_vertical> {};
 
-struct stop_vel : public lgn::app::input_action<stop_vel> {};
 
 struct exit_action : public lgn::app::input_action<exit_action> {};
 struct restart_action : public lgn::app::input_action<restart_action> {};
