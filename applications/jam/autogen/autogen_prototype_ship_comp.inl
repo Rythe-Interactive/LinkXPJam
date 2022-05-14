@@ -1,4 +1,4 @@
-#include "autogen_prototype_player_comp.hpp"
+#include "autogen_prototype_ship_comp.hpp"
 #include "../../jam/components/playercomp.hpp"
 namespace legion { using namespace core; }
 namespace legion::core
