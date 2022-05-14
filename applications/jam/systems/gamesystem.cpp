@@ -81,10 +81,12 @@ void GameSystem::setup()
 
     auto ent = createEntity();
     position& pos = ent.add_component<position>();
-
     ent.add_component<rotation>();
     ent.add_component<scale>();
-    ent.add_component<player_comp>();
+    ent.add_component<rigidbody>();
+    player_comp& playerComp = ent.add_component<player_comp>();
+    killable& k = ent.add_component<killable>();
+    k.health = playerComp.initHealth;
     ent.add_component(gfx::mesh_renderer{ gfx::MaterialCache::get_material("default"), rendering::ModelCache::create_model("Sphere", "assets://models/sphere.obj"_view) });
 
     bindToEvent<collision, &GameSystem::onCollision>();
@@ -128,17 +130,6 @@ void GameSystem::onGUI(app::window& context, L_MAYBEUNUSED gfx::camera& cam, L_M
 
 }
 
-void GameSystem::spawnEnemy()
-{
-
-}
-
-
-void GameSystem::shoot(ecs::entity ship)
-{
-    using namespace lgn;
-
-}
 
 void GameSystem::onCollision(collision& event)
 {
@@ -146,6 +137,39 @@ void GameSystem::onCollision(collision& event)
     //    event.first->name.empty() ? std::to_string(event.first->id) : event.first->name,
     //    event.second->name.empty() ? std::to_string(event.second->id) : event.second->name,
     //    event.normal.axis, event.normal.depth);
+    log::debug("Collision Event");
+
+    ecs::entity first = event.first;
+    ecs::entity second = event.second;
+
+    rigidbody& firstRB = first.get_component<rigidbody>();
+    rigidbody& secondRB = second.get_component<rigidbody>();
+
+    if (first.has_component<killable>())
+    {
+        if (second.has_component<bullet_comp>())
+        {
+            auto dmg = second.get_component<bullet_comp>()->damge;
+            first.get_component<killable>()->health -= dmg;
+            log::debug("Damage");
+        }
+    }
+
+    if (second.has_component<killable>())
+    {
+        if (first.has_component<bullet_comp>())
+        {
+            auto dmg = first.get_component<bullet_comp>()->damge;
+            second.get_component<killable>()->health -= dmg;
+            log::debug("Damage");
+        }
+    }
+
+    if (second.has_component<bullet_comp>())
+        second.destroy();
+    if (first.has_component<bullet_comp>())
+        first.destroy();
+    
 }
 
 void GameSystem::initInput()

@@ -38,11 +38,6 @@ public:
     void fixedUpdate(lgn::time::span deltaTime);
     void onGUI(app::window& context, gfx::camera& cam, const gfx::camera::camera_input& camInput, time::span deltaTime);
 
-    void spawnEnemy();
-
-    void shoot(ecs::entity ship);
-
-
     void onCollision(collision& event);
     void initInput();
 

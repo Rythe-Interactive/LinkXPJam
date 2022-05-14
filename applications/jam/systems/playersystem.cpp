@@ -72,6 +72,7 @@ void PlayerSystem::onShoot(player_shoot& action)
 void PlayerSystem::shoot()
 {
     auto bullet = createEntity("Bullet");
+    bullet.add_component<bullet_comp>();
     position& pos = bullet.add_component<position>();
     pos = player.get_component<position>();
     bullet.add_component<rotation>();
@@ -79,7 +80,13 @@ void PlayerSystem::shoot()
     scal = scale(.1f);
     bullet.add_component(gfx::mesh_renderer{ gfx::MaterialCache::get_material("default"), rendering::ModelCache::get_handle("Sphere") });
     rigidbody& rb = bullet.add_component<rigidbody>();
-    rb.addForce(player.get_component<rotation>()->forward() * 100.f);
+    rb.addForce(player.get_component<rotation>()->forward() * 500.f);
+    rb.linearDrag = .1f;
+
+    collider& col = bullet.add_component<collider>();
+    col.layer = 4;
+    col.ignoreMask = 4;
+    col.add_shape<SphereCollider>();
 }
 
 void PlayerSystem::horizontal_move(player_horizontal& axis)
