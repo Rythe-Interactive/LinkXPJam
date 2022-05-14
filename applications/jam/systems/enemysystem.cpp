@@ -51,13 +51,16 @@ void EnemySystem::fixedUpdate(lgn::time::span dt)
         }
 
         if (math::length(static_cast<math::vec3>(sumVel)) > 0.0f)
-            sumVel = math::normalize(sumVel) * enemyComp.speed * static_cast<float>(dt);
+            sumVel = math::normalize(sumVel) * enemyComp.speed;
 
         //if (math::distance(playerPos, static_cast<math::vec3>(pos)) > 1.f)
-            //sumVel += math::normalize(playerPos - pos) * enemyComp.speed * static_cast<float>(dt);
+            //sumVel += math::normalize(playerPos - pos) * enemyComp.speed;
 
         if (math::length(static_cast<math::vec3>(sumVel)) > 0.0f)
-            player.get_component<rigidbody>()->velocity = sumVel;
+        {
+            rigidbody& rb = ent.get_component<rigidbody>();
+            rb.velocity = sumVel;
+        }
     }
 }
 

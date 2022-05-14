@@ -7,7 +7,7 @@ void PlayerSystem::setup()
     using namespace lgn;
     log::debug("PlayerSystem setup");
 
-    player = createEntity();
+    auto player = createEntity();
     position& pos = player.add_component<position>();
     player.add_component<rotation>();
     scale& scal = player.add_component<scale>();
@@ -49,8 +49,9 @@ void PlayerSystem::setup()
 
 void PlayerSystem::fixedUpdate(lgn::time::span deltaTime)
 {
-    if (player)
+    for (auto ent : players)
     {
+        player = ent;
         app::window& context = ecs::world.get_component<app::window>();
         float renderScale = rendering::FramebufferResizeStage::getRenderScale();
         math::ivec2 framebufferSize = context.framebufferSize();
@@ -69,11 +70,11 @@ void PlayerSystem::fixedUpdate(lgn::time::span deltaTime)
         auto worldMousePos = screenToWorld * math::vec4(mousePos.x, mousePos.y, 0.0f, 1.f);
         position lookAtPos = math::vec3(worldMousePos.x * 20.f, 0.f, worldMousePos.z * 20.f);
 
-        position& pos = player.get_component<position>();
-        rigidbody& rb = player.get_component<rigidbody>();
+        position& pos = ent.get_component<position>();
+        rigidbody& rb = ent.get_component<rigidbody>();
         rb.velocity = math::vec3(movement.x, 0.f, movement.y);
 
-        rotation& rot = player.get_component<rotation>();
+        rotation& rot = ent.get_component<rotation>();
         rot = rotation::lookat(pos, lookAtPos);
 
         if (shooting)
@@ -108,11 +109,11 @@ void PlayerSystem::shoot()
 
 void PlayerSystem::horizontal_move(player_horizontal& axis)
 {
-    movement.x = axis.value * axis.input_delta * speed;
+    movement.x = axis.value * speed;
 }
 
 void PlayerSystem::vertical_move(player_vertical& axis)
 {
-    movement.y = axis.value * axis.input_delta * speed;
+    movement.y = axis.value * speed;
 }
 

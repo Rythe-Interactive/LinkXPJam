@@ -13,13 +13,13 @@ struct player_shoot : public lgn::app::input_action<player_shoot> {};
 using namespace lgn;
 class PlayerSystem final : public legion::System<PlayerSystem>
 {
-    ecs::filter<position, rotation, scale, player_comp> players;
+    ecs::filter<player_comp> players;
     ecs::filter<position, rotation, scale, rendering::camera > cameras;
     ecs::entity player;
     ecs::entity camera;
 
     math::vec2 movement;
-    float speed = 2.f;
+    float speed = 10.f;
     bool shooting = false;
 
 public:
