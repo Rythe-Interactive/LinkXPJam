@@ -41,6 +41,12 @@ void GameSystem::setup()
             }));
         ecs::world.add_component(gfx::skybox_renderer{ skyboxMat });
 
+        auto groundplane = createEntity("Ground Plane");
+        auto groundmat = rendering::MaterialCache::create_material("floor", "assets://shaders/groundplane.shs"_view);
+        groundmat.set_param("floorTile", rendering::TextureCache::create_texture("floorTile", "engine://resources/default/tile.png"_view));
+        groundplane.add_component(gfx::mesh_renderer{ groundmat, rendering::ModelCache::create_model("floor", "assets://models/plane.obj"_view) });
+        groundplane.add_component<transform>();
+
         {
             audio::AudioSegmentCache::createAudioSegment("Explosion", fs::view("assets://audio/fx/Explosion2.wav"));
             audio::AudioSegmentCache::createAudioSegment("LaserShot", fs::view("assets://audio/fx/Laser_Shoot.wav"));
@@ -48,28 +54,21 @@ void GameSystem::setup()
         }
 
         {
-            gfx::MaterialCache::create_material("ShipLit", fs::view("engine://shaders/default_lit.shs"));
-            texture_import_settings settings = gfx::default_texture_settings;
-            settings.mag = gfx::texture_mipmap::nearest;
-            auto color = gfx::TextureCache::create_texture(fs::view("assets://textures/ship/ColorPalette.png"), settings);
-            auto emissive = gfx::TextureCache::create_texture(fs::view("assets://textures/ship/EmissivePallete.png"), settings);
-            auto metallic = gfx::TextureCache::create_texture(fs::view("assets://textures/ship/MetallicPalette.png"), settings);
-            auto roughness = gfx::TextureCache::create_texture(fs::view("assets://textures/ship/RoughnessPalette.png"), settings);
-            gfx::MaterialCache::get_material("ShipLit").set_param("albedoTex", color);
-            gfx::MaterialCache::get_material("ShipLit").set_param("useAlbedoTex", true);
-            gfx::MaterialCache::get_material("ShipLit").set_param("emissiveTex", emissive);
-            gfx::MaterialCache::get_material("ShipLit").set_param("useEmissiveTex", true);
-            gfx::MaterialCache::get_material("ShipLit").set_param("roughnessTex", roughness);
-            gfx::MaterialCache::get_material("ShipLit").set_param("useRoughnessTex", true);
-            gfx::MaterialCache::get_material("ShipLit").set_param("metallicTex", metallic);
-            gfx::MaterialCache::get_material("ShipLit").set_param("useMetallicTex", true);
+            auto mat = gfx::MaterialCache::create_material("default", fs::view("assets://shaders/pbr.shs"));
+            auto color = gfx::TextureCache::create_texture(fs::view("engine://resources/default/albedo.png"));
+            auto emissive = gfx::TextureCache::create_texture(fs::view("engine://resources/default/emissive.png"));
+            auto mrdao = gfx::TextureCache::create_texture(fs::view("engine://resources/default/MRDAo.png"));
+            auto normalHeight = gfx::TextureCache::create_texture(fs::view("engine://resources/default/normalHeight.png"));
+            mat.set_param(SV_ALBEDO, color);
+            mat.set_param(SV_EMISSIVE, emissive);
+            mat.set_param(SV_MRDAO, mrdao);
+            mat.set_param(SV_NORMALHEIGHT, normalHeight);
+            mat.set_param(SV_HEIGHTSCALE, 1.f);
+
+            auto ent = createEntity("Sphere");
+            ent.add_component(gfx::mesh_renderer{ mat, rendering::ModelCache::create_model("Sphere", "assets://models/sphere.obj"_view) });
+            ent.add_component<transform>();
         }
-        camera = createEntity("Camera");
-        camera.add_component<transform>(position(0.f, 0.f, 0.f), rotation::lookat(position(0.f, 0.f, 0.f), position(0.f, 0.0, 4.f)), scale());
-        camera.add_component<audio::audio_listener>();
-        rendering::camera cam;
-        cam.set_projection(60.f, 0.001f, 1000.f);
-        camera.add_component<gfx::camera>(cam);
     }
 
     //for (int i = 0; i < 512; i++)
