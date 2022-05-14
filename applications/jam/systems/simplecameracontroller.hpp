@@ -22,7 +22,7 @@ public:
     ecs::entity camera;
 
     bool escaped = true;
-    bool playing = true;
+    bool playing = false;
     float movementspeed = 2.f;
 
     void setup();

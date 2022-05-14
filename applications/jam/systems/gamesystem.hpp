@@ -27,15 +27,15 @@ class GameSystem final : public legion::System<GameSystem>
 {
 public:
     lgn::ecs::entity player;
+
+    std::unordered_map<id_type, key_frame_list> animations;
     
     float score = 0;
     float linearMovement = 300.f;
     float radialMovement = 10.f;
-
     bool escaped = false;
 
     void setup();
-    void fixedUpdate(lgn::time::span deltaTime);
     void onGUI(app::window& context, gfx::camera& cam, const gfx::camera::camera_input& camInput, time::span deltaTime);
 
     void onCollision(collision& event);
@@ -46,4 +46,7 @@ public:
     void onExit(exit_action& action);
     void onFullscreen(fullscreen_action& action);
     void onVSYNCSwap(vsync_action& action);
+
+    //key_frame_list& create_animation(const std::string& name, key_frame_list keyFrames );
+    //key_frame_list& get_animation(const std::string& name);
 };

@@ -7,10 +7,26 @@ void PlayerSystem::setup()
     using namespace lgn;
     log::debug("PlayerSystem setup");
 
-    if(!players.empty())
-    {
-        player = players[0];
-    }
+    player = createEntity();
+    position& pos = player.add_component<position>();
+    player.add_component<rotation>();
+    scale& scal = player.add_component<scale>();
+    scal = scale(1.5f);
+    player.add_component<rigidbody>();
+    player_comp& playerComp = player.add_component<player_comp>();
+    killable& k = player.add_component<killable>();
+    k.health = playerComp.initHealth;
+    animated_mesh_renderer& anim = player.add_component(animated_mesh_renderer(gfx::MaterialCache::get_material("default"), key_frame_list{
+                { gfx::ModelCache::create_model("Player0", fs::view("assets://models/player0.glb")), 0.05f },
+                { gfx::ModelCache::create_model("Player1", fs::view("assets://models/player1.glb")), 0.05f },
+                { gfx::ModelCache::create_model("Player2", fs::view("assets://models/player2.glb")), 0.05f },
+                { gfx::ModelCache::create_model("Player3", fs::view("assets://models/player3.glb")), 0.05f },
+                { gfx::ModelCache::create_model("Player4", fs::view("assets://models/player4.glb")), 0.05f },
+                { gfx::ModelCache::create_model("Player5", fs::view("assets://models/player5.glb")), 0.05f },
+                { gfx::ModelCache::create_model("Player6", fs::view("assets://models/player6.glb")), 0.05f }
+        }));
+
+    //anim.playing = false;
 
     if (!cameras.empty())
     {
@@ -54,7 +70,8 @@ void PlayerSystem::fixedUpdate(lgn::time::span deltaTime)
         position lookAtPos = math::vec3(worldMousePos.x * 20.f, 0.f, worldMousePos.z * 20.f);
 
         position& pos = player.get_component<position>();
-        pos += math::vec3(movement.x, 0.f, movement.y);
+        rigidbody& rb = player.get_component<rigidbody>();
+        rb.velocity = math::vec3(movement.x, 0.f, movement.y);
 
         rotation& rot = player.get_component<rotation>();
         rot = rotation::lookat(pos, lookAtPos);

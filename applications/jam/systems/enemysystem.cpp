@@ -5,15 +5,20 @@
 
 void EnemySystem::setup()
 {
-    for (auto ent : players)
-    {
-        player = ent;
-    }
+
     createProcess<&EnemySystem::fixedUpdate>("Update", 0.02f);
 }
 
 void EnemySystem::fixedUpdate(lgn::time::span dt)
 {
+    for (auto ent : players)
+    {
+        player = ent;
+    }
+
+    if (!player)
+        return;
+
     if (!pause)
     {
         elapsedTime += static_cast<float>(dt);
@@ -52,7 +57,7 @@ void EnemySystem::fixedUpdate(lgn::time::span dt)
             //sumVel += math::normalize(playerPos - pos) * enemyComp.speed * static_cast<float>(dt);
 
         if (math::length(static_cast<math::vec3>(sumVel)) > 0.0f)
-            pos += sumVel;
+            player.get_component<rigidbody>()->velocity = sumVel;
     }
 }
 
@@ -67,13 +72,11 @@ void EnemySystem::spawnEnemy()
     ent.add_component<scale>();
     enemy_comp& enemyComp = ent.add_component<enemy_comp>();
     killable& k = ent.add_component<killable>();
-    ent.add_component<rigidbody>();
-
     k.health = enemyComp.initHealth;
 
+    ent.add_component<rigidbody>();
+
     collider& col = ent.add_component<collider>();
-    col.layer = 4;
-    col.ignoreMask = 4;
     col.add_shape<SphereCollider>();
 
     ent.add_component(animated_mesh_renderer(gfx::MaterialCache::get_material("default"), key_frame_list{

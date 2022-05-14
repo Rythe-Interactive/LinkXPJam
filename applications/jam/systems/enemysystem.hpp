@@ -9,7 +9,7 @@ class EnemySystem final : public legion::System<EnemySystem>
 {
 public:
     ecs::filter<position, rotation, scale, rigidbody, enemy_comp> enemies;
-    ecs::filter<position, rotation, scale, player_comp> players;
+    ecs::filter<position, rotation, scale, rigidbody, player_comp> players;
     ecs::entity player;
     float spawnInterval = 2.f;
     float elapsedTime = 0.0f;

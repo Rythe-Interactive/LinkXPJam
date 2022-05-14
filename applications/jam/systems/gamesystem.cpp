@@ -67,15 +67,6 @@ void GameSystem::setup()
             mat.set_param(SV_MRDAO, mrdao);
             mat.set_param(SV_NORMALHEIGHT, normalHeight);
             mat.set_param(SV_HEIGHTSCALE, 1.f);
-
-            auto ent = createEntity("Animated");
-            ent.add_component(animated_mesh_renderer(mat, key_frame_list{
-                { gfx::ModelCache::create_model("Sphere", "assets://models/sphere.obj"_view), 0.5f },
-                { gfx::ModelCache::create_model("UV Sphere", "assets://models/uvsphere.obj"_view), 0.5f },
-                { gfx::ModelCache::create_model("Cube", "assets://models/cube.glb"_view), 0.5f },
-                { gfx::ModelCache::create_model("UV Sphere", "assets://models/uvsphere.obj"_view), 0.5f }
-                }));
-            ent.add_component<transform>();
         }
     }
 
@@ -95,13 +86,19 @@ void GameSystem::setup()
     col.add_shape<SphereCollider>();
 
     bindToEvent<collision, &GameSystem::onCollision>();
-    createProcess<&GameSystem::fixedUpdate>("Update", 0.2f);
 }
 
-void GameSystem::fixedUpdate(lgn::time::span deltaTime)
-{
-
-}
+//key_frame_list& GameSystem::create_animation(const std::string& name, key_frame_list keyFrames)
+//{
+//    //id_type id = nameHash(name);
+//
+//    //animations.emplace(id, keyFrames);
+//}
+//
+//key_frame_list& GameSystem::get_animation(const std::string& name)
+//{
+//
+//}
 
 void GameSystem::onGUI(app::window& context, L_MAYBEUNUSED gfx::camera& cam, L_MAYBEUNUSED const gfx::camera::camera_input& camInput, time::span deltaTime)
 {
@@ -142,7 +139,6 @@ void GameSystem::onCollision(collision& event)
     //    event.first->name.empty() ? std::to_string(event.first->id) : event.first->name,
     //    event.second->name.empty() ? std::to_string(event.second->id) : event.second->name,
     //    event.normal.axis, event.normal.depth);
-    log::debug("Collision Event");
 
     ecs::entity first = event.first;
     ecs::entity second = event.second;
@@ -156,7 +152,6 @@ void GameSystem::onCollision(collision& event)
         {
             auto dmg = second.get_component<bullet_comp>()->damge;
             first.get_component<killable>()->health -= dmg;
-            log::debug("Damage");
         }
     }
 
@@ -166,7 +161,6 @@ void GameSystem::onCollision(collision& event)
         {
             auto dmg = first.get_component<bullet_comp>()->damge;
             second.get_component<killable>()->health -= dmg;
-            log::debug("Damage");
         }
     }
 
@@ -191,7 +185,7 @@ void GameSystem::onCollision(collision& event)
         second.destroy();
     if (first.has_component<bullet_comp>())
         first.destroy();
-    
+
 }
 
 void GameSystem::initInput()
