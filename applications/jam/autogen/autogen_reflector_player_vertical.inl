@@ -1,5 +1,5 @@
 #include "autogen_reflector_player_vertical.hpp"
-#include "../../jam/systems/gamesystem.hpp"
+#include "../../jam/systems/playersystem.hpp"
 namespace legion { using namespace core; }
 namespace legion::core
 {

@@ -30,7 +30,7 @@ public:
         reportSystem<SimpleCameraController>();
         //reportSystem<BulletSystem>();
         //reportSystem<EnemySystem>();
-       // reportSystem<PlayerSystem>();
+        reportSystem<PlayerSystem>();
         //reportSystem<CameraFollowSystem>();
     }
 };

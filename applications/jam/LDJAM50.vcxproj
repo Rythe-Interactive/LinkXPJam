@@ -135,6 +135,7 @@
     <ClCompile Include="systems\gui_test.cpp" />
     <ClCompile Include="systems\physicssystem.cpp" />
     <ClCompile Include="systems\playersystem.cpp" />
+    <ClCompile Include="systems\simplecameracontroller.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="autogen\autogen.hpp" />
