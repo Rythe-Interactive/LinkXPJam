@@ -48,6 +48,9 @@
     <ClCompile Include="systems\playersystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="renderstages\animatedmeshrenderstage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">
@@ -141,6 +144,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="systems\simplecameracontroller.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderstages\animatedmeshrenderstage.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="components\animated_mesh_renderer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

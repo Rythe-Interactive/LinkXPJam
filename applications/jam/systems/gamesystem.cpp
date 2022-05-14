@@ -2,6 +2,8 @@
 #include "../components/components.hpp"
 #include "../defaults/defaultpolicies.hpp"
 
+#include "../renderstages/animatedmeshrenderstage.hpp"
+
 #include <rendering/data/particlepolicies/renderpolicy.hpp>
 #include <rendering/data/particlepolicies/flipbookpolicy.hpp>
 
@@ -20,6 +22,7 @@ void GameSystem::setup()
     {
         pipeline->attachStage<ImGuiStage>();
         pipeline->attachStage<MouseHover>();
+        pipeline->attachStage<AnimatedMeshRenderStage>();
     }
 
     initInput();
@@ -65,8 +68,13 @@ void GameSystem::setup()
             mat.set_param(SV_NORMALHEIGHT, normalHeight);
             mat.set_param(SV_HEIGHTSCALE, 1.f);
 
-            auto ent = createEntity("Sphere");
-            ent.add_component(gfx::mesh_renderer{ mat, rendering::ModelCache::create_model("Sphere", "assets://models/sphere.obj"_view) });
+            auto ent = createEntity("Animated");
+            ent.add_component(animated_mesh_renderer(mat, key_frame_list{
+                { gfx::ModelCache::create_model("Sphere", "assets://models/sphere.obj"_view), 0.5f },
+                { gfx::ModelCache::create_model("UV Sphere", "assets://models/uvsphere.obj"_view), 0.5f },
+                { gfx::ModelCache::create_model("Cube", "assets://models/cube.glb"_view), 0.5f },
+                { gfx::ModelCache::create_model("UV Sphere", "assets://models/uvsphere.obj"_view), 0.5f }
+                }));
             ent.add_component<transform>();
         }
     }

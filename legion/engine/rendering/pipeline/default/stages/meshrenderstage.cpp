@@ -8,6 +8,7 @@ namespace legion::rendering
 {
     void MeshRenderStage::setup(app::window& context)
     {
+
     }
 
     void MeshRenderStage::render(app::window& context, camera& cam, const camera::camera_input& camInput, time::span deltaTime)
