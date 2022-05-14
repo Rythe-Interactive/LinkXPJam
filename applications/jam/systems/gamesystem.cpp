@@ -65,19 +65,19 @@ void GameSystem::setup()
             mat.set_param(SV_NORMALHEIGHT, normalHeight);
             mat.set_param(SV_HEIGHTSCALE, 1.f);
 
-            auto ent = createEntity("Sphere");
+            /*auto ent = createEntity("Sphere");
             ent.add_component(gfx::mesh_renderer{ mat, rendering::ModelCache::create_model("Sphere", "assets://models/sphere.obj"_view) });
-            ent.add_component<transform>();
+            ent.add_component<transform>();*/
         }
     }
 
-    //for (int i = 0; i < 512; i++)
-    //{
-    //    auto ent = createEntity();
-    //    ent.add_component<transform>();
-    //    auto src = ent.add_component<audio::audio_source>(audio::AudioSegmentCache::getAudioSegment("LaserShot"));
-    //    src->play();
-    //}
+    auto ent = createEntity();
+    position& pos = ent.add_component<position>();
+
+    ent.add_component<rotation>();
+    ent.add_component<scale>();
+    ent.add_component<player_comp>();
+    ent.add_component(gfx::mesh_renderer{ gfx::MaterialCache::get_material("default"), rendering::ModelCache::create_model("Sphere", "assets://models/sphere.obj"_view) });
 
     bindToEvent<collision, &GameSystem::onCollision>();
     createProcess<&GameSystem::fixedUpdate>("Update", 0.2f);
@@ -85,15 +85,7 @@ void GameSystem::setup()
 
 void GameSystem::fixedUpdate(lgn::time::span deltaTime)
 {
-    ecs::filter<position, rotation, scale, audio::audio_source> filter;
-    for (auto src_ent : filter)
-    {
-        auto src = src_ent.get_component<audio::audio_source>();
-        if (src->isStopped())
-        {
-            src_ent.destroy();
-        }
-    }
+
 }
 
 void GameSystem::onGUI(app::window& context, L_MAYBEUNUSED gfx::camera& cam, L_MAYBEUNUSED const gfx::camera::camera_input& camInput, time::span deltaTime)
@@ -134,12 +126,6 @@ void GameSystem::spawnEnemy()
 }
 
 
-void GameSystem::onShoot(player_shoot& action)
-{
-    if (escaped)
-        return;
-}
-
 void GameSystem::shoot(ecs::entity ship)
 {
     using namespace lgn;
@@ -162,9 +148,9 @@ void GameSystem::initInput()
     app::InputSystem::createBinding<tonemap_action>(app::inputmap::method::F2);
     app::InputSystem::createBinding<auto_exposure_action>(app::inputmap::method::F4);
     app::InputSystem::createBinding<exit_action>(app::inputmap::method::ESCAPE);
-    app::InputSystem::createBinding<player_shoot>(app::inputmap::method::MOUSE_LEFT);
+    //app::InputSystem::createBinding<player_shoot>(app::inputmap::method::MOUSE_LEFT);
 
-    bindToEvent<player_shoot, &GameSystem::onShoot>();
+    //bindToEvent<player_shoot, &GameSystem::onShoot>();
 
     bindToEvent<tonemap_action, &GameSystem::onTonemapSwitch>();
     bindToEvent<auto_exposure_action, &GameSystem::onAutoExposureSwitch>();

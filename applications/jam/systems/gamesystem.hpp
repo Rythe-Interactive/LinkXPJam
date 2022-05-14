@@ -16,8 +16,6 @@ struct switch_skybox_action : public lgn::app::input_action<switch_skybox_action
 struct auto_exposure_action : public lgn::app::input_action<auto_exposure_action> {};
 struct reload_shaders_action : public lgn::app::input_action<reload_shaders_action> {};
 
-struct player_shoot : public lgn::app::input_action<player_shoot> {};
-
 
 struct exit_action : public lgn::app::input_action<exit_action> {};
 struct restart_action : public lgn::app::input_action<restart_action> {};
@@ -42,7 +40,6 @@ public:
 
     void spawnEnemy();
 
-    void onShoot(player_shoot& action);
     void shoot(ecs::entity ship);
 
 
