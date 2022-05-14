@@ -47,7 +47,6 @@ public:
         bindToEvent<player_look_y, &SimpleCameraController::onPlayerLookY>();
         bindToEvent<player_speedup, &SimpleCameraController::onSpeedUp>();
         bindToEvent<escape_cursor_action, &SimpleCameraController::onEscapeCursor>();
-
 #pragma endregion
 
         app::window& window = ecs::world.get_component<app::window>();
@@ -75,7 +74,7 @@ public:
     void setupCameraEntity()
     {
         camera = createEntity("Camera");
-        camera.add_component<transform>(position(0.f, 3.f, -30.f), rotation::lookat(math::float3::zero, math::float3::forward), scale());
+        camera.add_component<transform>(position(0.f, 3.f, -30.f), rotation::lookat(math::vec3::zero, math::vec3::forward), scale());
         camera.add_component<audio::audio_listener>();
 
         rendering::camera cam;
@@ -122,8 +121,8 @@ public:
 
         position& pos = camera.get_component<position>();
         rotation& rot = camera.get_component<rotation>();
-        math::float3 move = rot.forward();
-        pos += math::normalize(move * math::float3(1, 0, 1)) * action.value * action.input_delta * movementspeed;
+        math::vec3 move = math::toMat3(rot) * math::vec3(0.f, 0.f, 1.f);
+        pos += math::normalize(move * math::vec3(1, 0, 1)) * action.value * action.input_delta * movementspeed;
     }
 
     void onPlayerStrive(player_strive& action)
@@ -136,8 +135,8 @@ public:
 
         position& pos = camera.get_component<position>();
         rotation& rot = camera.get_component<rotation>();
-        math::float3 move = rot.right();
-        pos += math::normalize(move * math::float3(1, 0, 1)) * action.value * action.input_delta * movementspeed;
+        math::vec3 move = math::toMat3(rot) * math::vec3(1.f, 0.f, 0.f);
+        pos += math::normalize(move * math::vec3(1, 0, 1)) * action.value * action.input_delta * movementspeed;
     }
 
     void onPlayerFly(player_fly& action)
@@ -149,7 +148,7 @@ public:
             return;
 
         position& pos = camera.get_component<position>();
-        pos += (math::float3(0.f, action.value * action.input_delta * movementspeed, 0.f));
+        pos += (math::vec3(0.f, action.value * action.input_delta * movementspeed, 0.f));
     }
 
     void onPlayerLookX(player_look_x& action)
@@ -161,7 +160,7 @@ public:
             return;
 
         rotation& rot = camera.get_component<rotation>();
-        rot = math::angleAxis(action.value * action.input_delta * 500.f, math::float3::up) * rot;
+        rot = math::angleAxis(action.value * action.input_delta * 500.f, math::vec3::up) * rot;
     }
 
     void onPlayerLookY(player_look_y& action)
@@ -173,10 +172,11 @@ public:
             return;
 
         rotation& rot = camera.get_component<rotation>();
-        math::float3 right = rot.right();
-        math::float3 fwd = math::normalize(math::cross(right, math::float3::up));
-        math::float3 up = rot.up();
-        float angle = std::acos(math::dot(fwd, up));
+        math::mat3 rotMat = math::toMat3(rot);
+        math::vec3 right = rotMat * math::vec3::right;
+        math::vec3 fwd = math::normalize(math::cross(right, math::vec3::up));
+        math::vec3 up = rotMat * math::vec3::up;
+        float angle = math::orientedAngle(fwd, up, right);
 
         angle += action.value * action.input_delta * 500.f;
 
@@ -185,9 +185,9 @@ public:
         if (angle < -(math::pi<float>() - 0.001f))
             angle = -(math::pi<float>() - 0.001f);
 
-        up = fwd * math::angleAxis(angle, right);
+        up = math::mat3(math::axisAngleMatrix(right, angle)) * fwd;
         fwd = math::cross(right, up);
-        rot = rotation::lookat(math::float3::zero, fwd, up);
+        rot = (rotation)math::conjugate(math::toQuat(math::lookAt(math::vec3::zero, fwd, up)));
     }
 #pragma endregion
 
