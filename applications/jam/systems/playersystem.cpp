@@ -7,14 +7,14 @@ void PlayerSystem::setup()
     using namespace lgn;
     log::debug("PlayerSystem setup");
 
-    for (ecs::entity ent : players)
+    if(!players.empty())
     {
-        player = ent;
+        player = players[0];
     }
 
-    for (ecs::entity ent : cameras)
+    if (!cameras.empty())
     {
-        camera = ent;
+        camera = cameras[0];
     }
 
     app::InputSystem::createBinding<player_horizontal>(app::inputmap::method::A, -1);
@@ -84,8 +84,8 @@ void PlayerSystem::shoot()
     rb.linearDrag = .1f;
 
     collider& col = bullet.add_component<collider>();
-    col.layer = 4;
-    col.ignoreMask = 4;
+    col.layer = 1;
+    col.ignoreMask = 1;
     col.add_shape<SphereCollider>();
 }
 

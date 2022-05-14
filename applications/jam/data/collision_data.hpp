@@ -53,4 +53,5 @@ struct [[no_reflect]] collision : events::event<collision>
     pointer<collider> firstCollider;
     pointer<collider> secondCollider;
     collision_normal normal;
+    math::vec3 pointOfImpact;
 };

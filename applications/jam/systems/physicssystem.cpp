@@ -8,13 +8,12 @@ void PhysicsSystem::setup()
     if (!m_boardPhase)
         m_boardPhase = std::make_unique<SpacialHash>();
 
-    createProcess<&PhysicsSystem::fixedUpdate>("Update", 0.02f);
+    createProcess<&PhysicsSystem::fixedUpdate>("Update", 0.01f);
 }
 
 void PhysicsSystem::fixedUpdate(time::time_span<fast_time> deltaTime)
 {
     checkCollisions(deltaTime);
-
     integrateRigidbodies(deltaTime);
 }
 
@@ -129,7 +128,7 @@ static math::vec3 calculateSupportPoint(
 static float calculateCollision(
     collider& firstCollider, const math::vec3& firstCenter, const math::mat4& firstTransf, const math::mat3& firstInvRot,
     collider& secondCollider, const math::vec3& secondCenter, const math::mat4& secondTransf, const math::mat3& secondInvRot,
-    const math::vec3& direction)
+    const math::vec3& direction, math::vec3& collisionCenter)
 {
     math::vec3 firstSupport = firstCenter;
     float furthestDist2 = 0.f;
@@ -163,6 +162,7 @@ static float calculateCollision(
     }
     secondSupport = (secondTransf * math::vec4(secondSupport, 1.f)).xyz();
 
+    collisionCenter = (firstSupport + secondSupport) * 0.5f;
     return math::dot(firstSupport - secondSupport, direction);
 }
 
@@ -301,14 +301,17 @@ bool PhysicsSystem::checkCollision(const collision_pair& pair, collision& data)
 
     auto toSecond = safeNormalize((secondWorldPos + secondLocalCenter) - (firstWorldPos + firstLocalCenter));
 
+    math::vec3 collisionCenter;
+
     auto dist = calculateCollision(
         firstCollider, firstLocalCenter, firstTransf, firstInvRot,
         secondCollider, secondLocalCenter, secondTransf, secondInvRot,
-        toSecond);
+        toSecond, collisionCenter);
 
     if (dist >= 0)
     {
         data.normal = collision_normal{ toSecond, dist };
+        data.pointOfImpact = collisionCenter;
         data.first = pair.first;
         data.second = pair.second;
         data.firstCollider = { &firstCollider };

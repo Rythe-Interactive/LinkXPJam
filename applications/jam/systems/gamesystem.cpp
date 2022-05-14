@@ -35,7 +35,7 @@ void GameSystem::setup()
     app::context_guard guard(window);
     {
         auto skyboxMat = rendering::MaterialCache::create_material("skybox", "assets://shaders/skybox.shs"_view);
-        skyboxMat.set_param(SV_SKYBOX, TextureCache::create_texture("planet atmo", fs::view("assets://textures/HDRI/planetatmo7.png"),
+        skyboxMat.set_param(SV_SKYBOX, TextureCache::create_texture("planet atmo", fs::view("assets://textures/HDRI/park.jpg"),
             texture_import_settings
             {
                 texture_type::two_dimensional, true, channel_format::eight_bit, texture_format::rgba_hdr,
@@ -88,6 +88,11 @@ void GameSystem::setup()
     killable& k = ent.add_component<killable>();
     k.health = playerComp.initHealth;
     ent.add_component(gfx::mesh_renderer{ gfx::MaterialCache::get_material("default"), rendering::ModelCache::create_model("Sphere", "assets://models/sphere.obj"_view) });
+
+    collider& col = ent.add_component<collider>();
+    col.layer = 1;
+    col.ignoreMask = 1;
+    col.add_shape<SphereCollider>();
 
     bindToEvent<collision, &GameSystem::onCollision>();
     createProcess<&GameSystem::fixedUpdate>("Update", 0.2f);
@@ -164,6 +169,23 @@ void GameSystem::onCollision(collision& event)
             log::debug("Damage");
         }
     }
+
+    *first.get_component<position>() += -event.normal.axis * event.normal.depth;
+    *second.get_component<position>() += event.normal.axis * event.normal.depth;
+
+    float firstMass = 1.f / firstRB.inverseMass;
+    float secondMass = 1.f / secondRB.inverseMass;
+
+    float firstImpactForce = math::abs(math::dot(firstRB.velocity, event.normal.axis)) * firstMass;
+    float secondImpactForce = math::abs(math::dot(secondRB.velocity, event.normal.axis)) * secondMass;
+    float force = firstImpactForce + secondImpactForce;
+
+    float totalMass = firstMass + secondMass;
+    float firstImpactFract = firstMass / totalMass;
+    float secondImpactFract = secondMass / totalMass;
+
+    firstRB.addForceAt(event.pointOfImpact, -event.normal.axis * force * firstImpactFract);
+    secondRB.addForceAt(event.pointOfImpact, event.normal.axis * force * secondImpactFract);
 
     if (second.has_component<bullet_comp>())
         second.destroy();
