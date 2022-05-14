@@ -121,6 +121,7 @@ namespace legion::audio
             // If the file is already playing or if the file will be played on next update > return
             if (m_nextPlayState == playstate::playing) return;
             m_changes |= sound_properties::playState;
+            m_playState = playstate::playing;
             m_nextPlayState = playstate::playing;
             // Do not set playstate to playing - audiosystem will set it accordingly
         }
@@ -242,15 +243,6 @@ namespace legion::audio
             return m_looping;
         }
 
-
-        /**
-         * @brief Helper to implicitly convert to OpenAL source
-         */
-        operator ALuint() const
-        {
-            return m_sourceId;
-        }
-
     private:
         /**
         * @brief Function to clear the changes that will be applied
@@ -264,6 +256,8 @@ namespace legion::audio
 
         ALuint m_sourceId;
         audio_segment_handle m_audio_handle = invalid_audio_segment_handle;
+
+        position m_sourcePos;
 
         float m_pitch = 1.0f;
         float m_gain = 1.0f;

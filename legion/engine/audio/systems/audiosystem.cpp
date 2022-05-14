@@ -59,7 +59,15 @@ namespace legion::audio
 
         queryInformation();
 
-        //m_sourcePositions = std::unordered_map<ecs::component_handle<audio_source>, position>();
+        m_sourceIds.resize(255);
+
+        std::lock_guard guard(contextLock);
+        alcMakeContextCurrent(alcContext);
+        for (size_type i = 0; i < 255; i++)
+        {
+            alGenSources((ALuint)1, &m_sourceIds[i]);
+        }
+        alcMakeContextCurrent(nullptr);
 
         //ARGS function binding
 
@@ -167,23 +175,43 @@ namespace legion::audio
     {
         std::lock_guard guard(contextLock);
         alcMakeContextCurrent(alcContext);
+        ecs::filter<audio_source, position> sourceQuery;
 
-        static ecs::filter<audio_source> sourceQuery;
-        for (auto entity : sourceQuery)
+        auto compare = [&](std::pair<ecs::entity, position>& a, std::pair<ecs::entity, position>& b)
         {
-            auto sourceHandle = entity.get_component<audio_source>();
+            return math::distance2(a.second, static_cast<math::vec3>(m_listenerPosition)) < math::distance2(b.second, static_cast<math::vec3>(m_listenerPosition));
+        };
 
-            audio_source& source = sourceHandle.get();
+        std::vector<std::pair<ecs::entity, position>> elems;
+        for (size_type i = 0; i < sourceQuery.size(); i++)
+        {
+            position& pos = sourceQuery[i].get_component<position>();
+            elems.push_back(std::make_pair(sourceQuery[i], pos));
+        }
+
+        std::sort(elems.begin(), elems.end(), compare);
+        if (elems.size() > 255)
+            elems.resize(255);
+
+        auto idx = 0;
+        for (auto& sourcePosition : elems)
+        {
+            audio_source& source = sourcePosition.first.get_component<audio_source>();
+            position& pos = sourcePosition.second;
 
             if (source.m_sourceId == audio_source::invalid_source_id)
                 continue;
 
-            const position& p = entity.get_component<position>();
-            position& previousP = m_sourcePositions.at(sourceHandle);
+            source.m_sourceId = m_sourceIds[idx++];
+
+            const position& p = pos;
+            position& previousP = source.m_sourcePos;
             const math::vec3 vel = previousP - p;
             previousP = p;
             alSource3f(source.m_sourceId, AL_POSITION, p.x, p.y, p.z);
+            openal_error();
             alSource3f(source.m_sourceId, AL_VELOCITY, vel.x, vel.y, vel.z);
+            openal_error();
 
             using change = audio_source::sound_properties;
 
@@ -193,6 +221,7 @@ namespace legion::audio
                 if (source.m_playState != state::stopped)
                 {
                     alSourceStop(source.m_sourceId);
+                    openal_error();
                     source.m_playState = state::stopped;
                 }
                 if (source.m_audio_handle) // audio has segment
@@ -200,44 +229,53 @@ namespace legion::audio
                     auto [segmentLock, segment] = source.m_audio_handle.get();
                     async::readwrite_guard segmentGuard(segmentLock);
                     alSourcei(source.m_sourceId, AL_BUFFER, segment.audioBufferId);
+                    openal_error();
                 }
                 else // audio has no segment
                 {
                     source.m_nextPlayState = state::stopped;
                     // Remove buffer from audio source
                     alSourcei(source.m_sourceId, AL_BUFFER, NULL);
+                    openal_error();
                 }
             }
             if (source.m_changes & change::pitch)
             {
                 // Pitch has changed
                 alSourcef(source.m_sourceId, AL_PITCH, source.getPitch());
+                openal_error();
             }
             if (source.m_changes & change::gain)
             {
                 // Gain has changed
                 alSourcef(source.m_sourceId, AL_GAIN, source.getGain());
+                openal_error();
             }
 
             if (source.m_changes & change::doRewind)
             {
                 alSourceRewind(source.m_sourceId);
+                openal_error();
             }
 
             if (source.m_changes & change::rollOffFactor)
             {
                 alSourcef(source.m_sourceId, AL_ROLLOFF_FACTOR, source.m_rolloffFactor);
+                openal_error();
             }
 
             if (source.m_changes & change::rollOffDistance)
             {
                 alSourcef(source.m_sourceId, AL_REFERENCE_DISTANCE, source.m_referenceDistance);
+                openal_error();
                 alSourcef(source.m_sourceId, AL_MAX_DISTANCE, source.m_maxDistance);
+                openal_error();
             }
 
             if (source.m_changes & change::looping)
             {
-                alSourcei(source, AL_LOOPING, static_cast<int>(source.m_looping));
+                alSourcei(source.m_sourceId, AL_LOOPING, static_cast<int>(source.m_looping));
+                openal_error();
             }
 
             if (source.m_changes & change::playState)
@@ -250,16 +288,19 @@ namespace legion::audio
                     {
                         source.m_playState = state::playing;
                         alSourcePlay(source.m_sourceId);
+                        openal_error();
                     }
                     else if (source.m_nextPlayState == state::paused)
                     {
                         source.m_playState = state::paused;
                         alSourcePause(source.m_sourceId);
+                        openal_error();
                     }
                     else if (source.m_nextPlayState == state::stopped)
                     {
                         source.m_playState = state::stopped;
                         alSourceStop(source.m_sourceId);
+                        openal_error();
                     }
                 }
                 else
@@ -272,6 +313,7 @@ namespace legion::audio
 
             ALenum isPlaying;
             alGetSourcei(source.m_sourceId, AL_SOURCE_STATE, &isPlaying);
+            openal_error();
             if (isPlaying == AL_STOPPED) {
                 source.m_playState = audio_source::stopped;
                 source.m_nextPlayState = audio_source::stopped;
@@ -301,19 +343,7 @@ namespace legion::audio
         auto handle = event.entity.get_component<audio_source>();
         audio_source& a = handle.get();
 
-        // do something with a.
-        initSource(a);
-
-        if (a.m_sourceId == audio_source::invalid_source_id)
-        {
-            log::warn("Invalid source ID, creation canceled");
-            handle.destroy();
-            return;
-        }
-
-        m_sourcePositions.emplace(handle, event.entity.get_component<position>().get());
-
-        ++sourceCount;
+        a.m_sourcePos = event.entity.get_component<position>().get();
     }
 
 
@@ -322,19 +352,9 @@ namespace legion::audio
         auto handle = event.entity.get_component<audio_source>();
         const audio_source& a = handle.get();
 
-        if (a.m_sourceId == audio_source::invalid_source_id)
-        {
-            log::warn("Invalid source ID, destruction canceld");
-            return;
-        }
-        m_sourcePositions.erase(handle);
-
         if (a.m_playState != audio_source::playstate::stopped)
             alSourceStop(a.m_sourceId);
 
-        alSourcei(a.m_sourceId, AL_BUFFER, NULL);
-        alDeleteSources(1, &a.m_sourceId); // Clear source
-        --sourceCount;
     }
 
     void AudioSystem::onAudioListenerComponentCreate(events::component_creation<audio_listener>& event)
@@ -371,73 +391,34 @@ namespace legion::audio
             alListener3f(AL_VELOCITY, 0, 0, 0);
             ALfloat ori[] = { 0, 0, 1.0f, 0, 1.0f, 0 };
             alListenerfv(AL_ORIENTATION, ori);
+            alcMakeContextCurrent(nullptr);
         }
     }
 
 
 #pragma endregion
-
     void AudioSystem::initSource(audio_source& source)
     {
-        if (sourceCount + 1 >= monoSources)
-        {
-            source.m_sourceId = audio_source::invalid_source_id;
-            return;
-        }
-
+        log::debug("init source");
         std::lock_guard guard(contextLock);
         alcMakeContextCurrent(alcContext);
 
-        alGenSources((ALuint)1, &source.m_sourceId);
         alSourcef(source.m_sourceId, AL_PITCH, source.m_pitch);
+        openal_error();
         alSourcef(source.m_sourceId, AL_GAIN, source.m_gain);
+        openal_error();
         alSourcei(source.m_sourceId, AL_LOOPING, source.m_looping ? AL_TRUE : AL_FALSE);
+        openal_error();
 
         // 3D audio stuffs
         alSourcef(source.m_sourceId, AL_ROLLOFF_FACTOR, source.m_pitch);
+        openal_error();
         alSourcef(source.m_sourceId, AL_REFERENCE_DISTANCE, source.m_referenceDistance);
+        openal_error();
         alSourcef(source.m_sourceId, AL_MAX_DISTANCE, source.m_maxDistance);
+        openal_error();
 
-        // NOTE TO SELF:
-        //      Set position and velocity to entity position and velocty
-        alSource3f(source.m_sourceId, AL_POSITION, 0, 0, 0);
-        alSource3f(source.m_sourceId, AL_VELOCITY, 0, 0, 0);
-
-        if (source.m_audio_handle)
-        {
-            auto [segmentLock, segment] = source.m_audio_handle.get();
-            async::readwrite_guard segmentGuard(segmentLock);
-            alSourcei(source.m_sourceId, AL_BUFFER, segment.audioBufferId);
-
-            if (source.m_changes & audio_source::sound_properties::playState)
-            {
-                using state = audio_source::playstate;
-                if (source.m_audio_handle)
-                {
-                    // Playstate has changed
-                    if (source.m_nextPlayState == state::playing)
-                    {
-                        source.m_playState = state::playing;
-                        alSourcePlay(source.m_sourceId);
-                    }
-                    else if (source.m_nextPlayState == state::paused)
-                    {
-                        source.m_playState = state::paused;
-                        alSourcePause(source.m_sourceId);
-                    }
-                    else if (source.m_nextPlayState == state::stopped)
-                    {
-                        source.m_playState = state::stopped;
-                        alSourceStop(source.m_sourceId);
-                    }
-                }
-                else
-                {
-                    source.m_nextPlayState = state::stopped;
-                }
-            }
-        }
-        source.clearChanges();
+        //openal_error();
         alcMakeContextCurrent(nullptr);
     }
 

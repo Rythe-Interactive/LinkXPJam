@@ -3,6 +3,7 @@
 #include <audio/components/audio_listener.hpp>
 
 #define AL_ALEXT_PROTOTYPES
+#define alCall(function, ...) alCallImpl(__FILE__, __LINE__, function, __VA_ARGS__)
 
 #if !defined(DOXY_EXCLUDE)
 #include <AL/alext.h>
@@ -16,12 +17,34 @@
 
 namespace legion::audio
 {
-
     inline void openal_error()
     {
-        ALCenum error;
+        ALenum error;
         while ((error = alGetError()) != AL_NO_ERROR)
-            legion::log::warn("ERROR: OpenAl error: {}", error);
+        {
+            std::string errMsg = std::to_string(error);
+            switch (error)
+            {
+            case AL_INVALID_NAME:
+                errMsg = "AL_INVALID_NAME: a bad name (ID) was passed to an OpenAL function";
+                break;
+            case AL_INVALID_ENUM:
+                errMsg = "AL_INVALID_ENUM: an invalid enum value was passed to an OpenAL function";
+                break;
+            case AL_INVALID_VALUE:
+                errMsg = "AL_INVALID_VALUE: an invalid value was passed to an OpenAL function";
+                break;
+            case AL_INVALID_OPERATION:
+                errMsg = "AL_INVALID_OPERATION: the requested operation is not valid";
+                break;
+            case AL_OUT_OF_MEMORY:
+                errMsg = "AL_OUT_OF_MEMORY: the requested operation resulted in OpenAL running out of memory";
+                break;
+            default:
+                errMsg = "UNKNOWN AL ERROR: " + std::to_string(error);
+            }
+            legion::log::warn("ERROR: OpenAl error: {}", errMsg);
+        }
     }
 
     /**@class AudioSystem
@@ -79,8 +102,9 @@ namespace legion::audio
         void setListener(position p, rotation r);
         ecs::entity m_listenerEnt;
 
+        float maxSourceDistance2 = 1000;
         position m_listenerPosition;
-        std::unordered_map<ecs::component<audio_source>, position> m_sourcePositions;
+        std::vector<ALuint> m_sourceIds;
         static ALCint frequency, refresh, sync, monoSources, stereoSources, maxAux;
 
         static ALCdevice* alDevice;

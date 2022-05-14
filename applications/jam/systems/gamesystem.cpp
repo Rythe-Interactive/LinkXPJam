@@ -64,7 +64,6 @@ void GameSystem::setup()
             gfx::MaterialCache::get_material("ShipLit").set_param("metallicTex", metallic);
             gfx::MaterialCache::get_material("ShipLit").set_param("useMetallicTex", true);
         }
-
         camera = createEntity("Camera");
         camera.add_component<transform>(position(0.f, 0.f, 0.f), rotation::lookat(position(0.f, 0.f, 0.f), position(0.f, 0.0, 4.f)), scale());
         camera.add_component<audio::audio_listener>();
@@ -73,7 +72,13 @@ void GameSystem::setup()
         camera.add_component<gfx::camera>(cam);
     }
 
-
+    for (int i = 0; i < 512; i++)
+    {
+        auto ent = createEntity();
+        ent.add_component<transform>();
+        auto src = ent.add_component<audio::audio_source>(audio::AudioSegmentCache::getAudioSegment("LaserShot"));
+        src->play();
+    }
 
     bindToEvent<collision, &GameSystem::onCollision>();
     createProcess<&GameSystem::fixedUpdate>("Update", 0.2f);
@@ -81,23 +86,15 @@ void GameSystem::setup()
 
 void GameSystem::fixedUpdate(lgn::time::span deltaTime)
 {
-    //ecs::filter<position, rotation, scale, audio::audio_source> filter;
-    //for (auto src_ent : filter)
-    //{
-    //    auto src = src_ent.get_component<audio::audio_source>();
-    //    if (src->isStopped())
-    //    {
-    //        src_ent.destroy();
-    //    }
-    //}
-
-    //for (int i = 0; i < 50; i++)
-    //{
-    //    auto ent = createEntity();
-    //    ent.add_component<transform>();
-    //    auto src = ent.add_component<audio::audio_source>(audio::AudioSegmentCache::getAudioSegment("LaserShot"));
-    //    src->play();
-    //}
+    ecs::filter<position, rotation, scale, audio::audio_source> filter;
+    for (auto src_ent : filter)
+    {
+        auto src = src_ent.get_component<audio::audio_source>();
+        if (src->isStopped())
+        {
+            src_ent.destroy();
+        }
+    }
 }
 
 void GameSystem::onGUI(app::window& context, L_MAYBEUNUSED gfx::camera& cam, L_MAYBEUNUSED const gfx::camera::camera_input& camInput, time::span deltaTime)
