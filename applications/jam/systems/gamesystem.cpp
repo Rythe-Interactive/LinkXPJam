@@ -95,8 +95,15 @@ void GameSystem::setup()
         }
 
         {
-            auto mat = gfx::MaterialCache::create_material("enemyMat", fs::view("assets://shaders/color.shs"));
-            mat.set_param("color", math::color(128,0,32));
+            auto mat = gfx::MaterialCache::create_material("enemyMat", fs::view("engine://shaders/default_lit.shs"));
+            mat.set_param("albedoColor", math::color(128.f / 255.f, 0.f, 32.f / 255.f));
+            mat.set_param("useAlbedoTex", false);
+            mat.set_param("useMetallicTex", false);
+            mat.set_param("useRoughnessTex", false);
+            mat.set_param("useEmissiveTex", false);
+            mat.set_param("metallicValue", 0.f);
+            mat.set_param("roughnessValue", 0.5f);
+            mat.set_param("emissiveColor", math::color(0, 0, 0));
         }
     }
 
