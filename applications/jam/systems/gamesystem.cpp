@@ -46,6 +46,8 @@ void GameSystem::setup()
             }));
         ecs::world.add_component(gfx::skybox_renderer{ skyboxMat });
 
+        rendering::ModelCache::create_model("Sphere", "assets://models/sphere.obj"_view);
+
         auto groundplane = createEntity("Ground Plane");
         auto groundmat = rendering::MaterialCache::create_material("floor", "assets://shaders/texture.shs"_view);
         groundmat.set_param("_texture", rendering::TextureCache::create_texture("floorTile", "assets://textures/big_room_red.png"_view));
@@ -90,6 +92,11 @@ void GameSystem::setup()
             mat.set_param("normalTex", normal);
             mat.set_param("useHeight", true);
             mat.set_param("heightTex", height);
+        }
+
+        {
+            auto mat = gfx::MaterialCache::create_material("enemyMat", fs::view("assets://shaders/color.shs"));
+            mat.set_param("color", math::color(128,0,32));
         }
     }
 
