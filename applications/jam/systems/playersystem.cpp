@@ -16,6 +16,17 @@ void PlayerSystem::setup()
     player.add_component<rigidbody>();
     player_comp& playerComp = player.add_component<player_comp>();
 
+    meleeCol = createEntity("meleeCol");
+    meleeCol.add_component<position>(pos + position(math::vec3::forward * 0.5f));
+    meleeCol.add_component(scale(1.5f));
+    meleeCol.add_component<rotation>();
+    {
+        collider& col = meleeCol.add_component<collider>();
+        col.add_shape<SphereCollider>();
+        col.layer = 1;
+        col.ignoreMask = 1;
+    }
+
     collider& col = player.add_component<collider>();
     col.add_shape<SphereCollider>();
     col.layer = 1;
@@ -64,6 +75,7 @@ void PlayerSystem::setup()
     bindToEvent<player_melee, &PlayerSystem::onMelee>();
     bindToEvent<player_horizontal, &PlayerSystem::horizontal_move>();
     bindToEvent<player_vertical, &PlayerSystem::vertical_move>();
+    bindToEvent<collision, &PlayerSystem::onCollision>();
 
     createProcess<&PlayerSystem::fixedUpdate>("Update", 0.02f);
 }
@@ -71,6 +83,10 @@ void PlayerSystem::setup()
 
 void PlayerSystem::fixedUpdate(lgn::time::span deltaTime)
 {
+    auto pos = *player.get_component<position>();
+    auto rot = *player.get_component<rotation>();
+    *meleeCol.get_component<position>() = pos + position(rot.forward() * 0.5f);
+
     switch (animState)
     {
     case player_anim_state::IDLE:
@@ -133,6 +149,7 @@ void PlayerSystem::setAnimationState(player_anim_state state)
             {
                 canShoot = true;
                 setAnimationState(player_anim_state::IDLE);
+                melee = false;
             }
         };
         anim.currentFrame = 0ull;
@@ -189,6 +206,30 @@ void PlayerSystem::move()
     rot = rotation::lookat(pos, lookAtPos);
 }
 
+void PlayerSystem::onCollision(collision& event)
+{
+    if (melee)
+    {
+        ecs::entity first = event.first;
+        ecs::entity second = event.second;
+
+        if (second == meleeCol && first.has_component<enemy_comp>())
+        {
+            auto& secondPos = *first.get_component<position>();
+            auto playerPos = *player.get_component<position>();
+            secondPos += math::normalize(secondPos - playerPos);
+            first.get_component<killable>()->health -= 3.f;
+        }
+        else if (first == meleeCol && second.has_component<enemy_comp>())
+        {
+            auto& secondPos = *second.get_component<position>();
+            auto playerPos = *player.get_component<position>();
+            secondPos += math::normalize(secondPos - playerPos);
+            second.get_component<killable>()->health -= 3.f;
+        }
+    }
+}
+
 void PlayerSystem::onShoot(player_shoot& action)
 {
     if (action.pressed() && canShoot)
@@ -205,6 +246,7 @@ void PlayerSystem::onMelee(player_melee& action)
         player.get_component<rigidbody>()->velocity = math::vec3::zero;
         setAnimationState(player_anim_state::MELEE);
         canShoot = false;
+        melee = true;
     }
 }
 

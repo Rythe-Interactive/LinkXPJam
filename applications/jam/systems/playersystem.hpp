@@ -5,6 +5,7 @@
 #include <audio/audio.hpp>
 
 #include "../components/components.hpp"
+#include "../data/collision_data.hpp"
 
 struct player_horizontal : public lgn::app::input_axis<player_horizontal> {};
 struct player_vertical : public lgn::app::input_axis<player_vertical> {};
@@ -24,6 +25,7 @@ class PlayerSystem final : public legion::System<PlayerSystem>
 {
     ecs::filter<position, rotation, scale, rendering::camera > cameras;
     ecs::entity player;
+    ecs::entity meleeCol;
     ecs::entity camera;
 
     player_anim_state animState = player_anim_state::IDLE;
@@ -33,6 +35,7 @@ class PlayerSystem final : public legion::System<PlayerSystem>
     math::vec2 movement;
     float speed = 10.f;
     bool canShoot = true;
+    bool melee = false;
 
 public:
     void setup();
@@ -44,6 +47,7 @@ public:
 
     void move();
 
+    void onCollision(collision& event);
     void onShoot(player_shoot& action);
     void onMelee(player_melee& action);
     void shoot();

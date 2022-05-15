@@ -165,6 +165,9 @@ void GameSystem::onCollision(collision& event)
     ecs::entity first = event.first;
     ecs::entity second = event.second;
 
+    if (!first.has_component<rigidbody>() || !second.has_component<rigidbody>())
+        return;
+
     rigidbody& firstRB = first.get_component<rigidbody>();
     rigidbody& secondRB = second.get_component<rigidbody>();
 
