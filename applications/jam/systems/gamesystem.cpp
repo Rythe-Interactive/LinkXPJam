@@ -47,10 +47,12 @@ void GameSystem::setup()
         ecs::world.add_component(gfx::skybox_renderer{ skyboxMat });
 
         auto groundplane = createEntity("Ground Plane");
-        auto groundmat = rendering::MaterialCache::create_material("floor", "assets://shaders/groundplane.shs"_view);
-        groundmat.set_param("floorTile", rendering::TextureCache::create_texture("floorTile", "engine://resources/default/tile.png"_view));
+        auto groundmat = rendering::MaterialCache::create_material("floor", "assets://shaders/texture.shs"_view);
+        groundmat.set_param("_texture", rendering::TextureCache::create_texture("floorTile", "assets://textures/big_room_red.png"_view));
         groundplane.add_component(gfx::mesh_renderer{ groundmat, rendering::ModelCache::create_model("floor", "assets://models/plane.obj"_view) });
         groundplane.add_component<transform>();
+        groundplane.get_component<position>() = position(0.f, -2.f, 0.f);
+        groundplane.get_component<scale>() = scale(30.f, 1.f, 20.f);
 
         {
             audio::AudioSegmentCache::createAudioSegment("Explosion", fs::view("assets://audio/fx/Explosion2.wav"));

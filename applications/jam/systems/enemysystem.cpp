@@ -90,8 +90,8 @@ void EnemySystem::spawnEnemy()
     col.layer = 2;
 
     ent.add_component(animated_mesh_renderer(gfx::MaterialCache::get_material("default"), key_frame_list{
-    { gfx::ModelCache::create_model("enemy0", "assets://models/sphere.obj"_view), 0.25f },
-    { gfx::ModelCache::create_model("enemy1", "assets://models/uvsphere.obj"_view), 0.25f },
+    { gfx::ModelCache::create_model("enemy0", "assets://models/enemy/enemy0.glb"_view), 0.25f },
+    { gfx::ModelCache::create_model("enemy1", "assets://models/enemy/enemy1.glb"_view), 0.25f },
         }));
 
 }
