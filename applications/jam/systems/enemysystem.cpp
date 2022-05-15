@@ -66,6 +66,7 @@ void EnemySystem::fixedUpdate(lgn::time::span dt)
         {
             rigidbody& rb = ent.get_component<rigidbody>();
             rb.velocity = sumVel;
+            *ent.get_component<rotation>() = (rotation)math::conjugate(math::toQuat(math::lookAt(math::vec3::zero, sumVel, math::vec3::up)));
         }
     }
 }
