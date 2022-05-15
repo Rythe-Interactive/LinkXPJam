@@ -25,7 +25,7 @@ struct [[reflectable]] rigidbody
     math::vec3 torqueAccumulator = math::vec3(0.0);
     math::vec3 globalCentreOfMass = math::vec3(0.0);
 
-    float restitution = 0.3f;
+    float restitution = 0.9f;
     float friction = 0.3f;
 
     static float calculateRestitution(float restitutionA, float restitutionB)

@@ -11,6 +11,8 @@
 #include <rendering/pipeline/gui/stages/imguirenderstage.hpp>
 #include <imgui/imgui_internal.h>
 
+lgn::ecs::entity GameSystem::core;
+
 void GameSystem::setup()
 {
     using namespace legion;
@@ -70,22 +72,36 @@ void GameSystem::setup()
         }
     }
 
-    auto ent = createEntity();
-    position& pos = ent.add_component<position>();
-    ent.add_component<rotation>();
-    ent.add_component<scale>();
-    ent.add_component<rigidbody>();
-    player_comp& playerComp = ent.add_component<player_comp>();
-    killable& k = ent.add_component<killable>();
-    k.health = playerComp.initHealth;
-    ent.add_component(gfx::mesh_renderer{ gfx::MaterialCache::get_material("default"), rendering::ModelCache::create_model("Sphere", "assets://models/sphere.obj"_view) });
+    auto camera = createEntity("Camera");
+    camera.add_component<transform>(position(0.f, 20.f, 0.f), rotation::lookat(position(0.f, 20.f, 0.f), math::vec3(0.f, 0.f, 0.0001f), math::vec3::up), scale());
+    camera.add_component<audio::audio_listener>();
 
-    collider& col = ent.add_component<collider>();
-    col.layer = 1;
-    col.ignoreMask = 1;
+    rendering::camera cam;
+    cam.set_projection(60.f, 0.001f, 1000.f);
+    camera.add_component<gfx::camera>(cam);
+
+    core = createEntity();
+    position& pos = core.add_component<position>();
+    core.add_component<rotation>();
+    core.add_component<scale>();
+    auto& rb = *core.add_component<rigidbody>();
+    rb.setMass(1000.f);
+    rb.linearDrag = 0.9f;
+    killable& k = core.add_component<killable>();
+    k.health = 100.f;
+    core.add_component(gfx::mesh_renderer{ gfx::MaterialCache::get_material("default"), rendering::ModelCache::create_model("Sphere", "assets://models/sphere.obj"_view) });
+
+    collider& col = core.add_component<collider>();
+    col.layer = 0;
+    col.ignoreMask = 0;
     col.add_shape<SphereCollider>();
 
     bindToEvent<collision, &GameSystem::onCollision>();
+}
+
+void GameSystem::update(time::span dt)
+{
+    deltaTime = dt;
 }
 
 //key_frame_list& GameSystem::create_animation(const std::string& name, key_frame_list keyFrames)
@@ -127,7 +143,13 @@ void GameSystem::onGUI(app::window& context, L_MAYBEUNUSED gfx::camera& cam, L_M
     imwindow = ImGui::GetCurrentWindow();
     imwindow->FontWindowScale = 2.f;
 
-    ImGui::Text("Health: %f", static_cast<float>(0));
+    if (!core)
+    {
+        ImGui::End();
+        return;
+    }
+
+    ImGui::Text("Health: %f", core.get_component<killable>()->health);
     ImGui::End();
 
 }
@@ -164,27 +186,44 @@ void GameSystem::onCollision(collision& event)
         }
     }
 
-    *first.get_component<position>() += -event.normal.axis * event.normal.depth;
-    *second.get_component<position>() += event.normal.axis * event.normal.depth;
+    if (first == core)
+    {
+        if (second.has_component<enemy_comp>())
+        {
+            core.get_component<killable>()->health -= deltaTime * 2.f;
+        }
+    }
+    else if (second == core)
+    {
+        if (first.has_component<enemy_comp>())
+        {
+            core.get_component<killable>()->health -= deltaTime * 2.f;
+        }
+    }
 
     float firstMass = 1.f / firstRB.inverseMass;
     float secondMass = 1.f / secondRB.inverseMass;
 
-    float firstImpactForce = math::abs(math::dot(firstRB.velocity, event.normal.axis)) * firstMass;
-    float secondImpactForce = math::abs(math::dot(secondRB.velocity, event.normal.axis)) * secondMass;
+    float firstImpactForce = math::abs(math::dot(firstRB.velocity, event.normal.axis));
+    float secondImpactForce = math::abs(math::dot(secondRB.velocity, event.normal.axis));
     float force = firstImpactForce + secondImpactForce;
 
     float totalMass = firstMass + secondMass;
-    float firstImpactFract = firstMass / totalMass;
-    float secondImpactFract = secondMass / totalMass;
+    float firstImpactFract = secondMass / totalMass;
+    float secondImpactFract = firstMass / totalMass;
 
-    firstRB.addForceAt(event.pointOfImpact, -event.normal.axis * force * firstImpactFract);
-    secondRB.addForceAt(event.pointOfImpact, event.normal.axis * force * secondImpactFract);
+    *first.get_component<position>() += -event.normal.axis * event.normal.depth * firstImpactFract;
+    *second.get_component<position>() += event.normal.axis * event.normal.depth * secondImpactFract;
+
+    math::vec3 acc = -event.normal.axis * force * firstImpactFract * (1.f + firstRB.restitution);
+    firstRB.velocity += acc;
+    acc = event.normal.axis * force * secondImpactFract * (1.f + secondRB.restitution);
+    secondRB.velocity += acc;
 
     if (second.has_component<bullet_comp>())
-        second.destroy();
+        second.remove_component<collider>();
     if (first.has_component<bullet_comp>())
-        first.destroy();
+        first.remove_component<collider>();
 
 }
 

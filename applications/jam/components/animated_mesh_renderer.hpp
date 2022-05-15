@@ -17,6 +17,7 @@ struct animated_mesh_renderer
     lgn::gfx::material_handle material;
     bool playing;
     bool looping;
+    lgn::delegate<void(lgn::index_type)> onAnimFrameSwitch;
 
     animated_mesh_renderer() noexcept : keyFrames(), timeBuffer(), currentFrame(), material(), playing(false), looping(true) {}
     animated_mesh_renderer(lgn::gfx::material_handle mat) noexcept : keyFrames(), timeBuffer(), currentFrame(), material(mat), playing(false), looping(true) {}

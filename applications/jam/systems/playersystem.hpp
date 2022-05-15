@@ -9,8 +9,9 @@
 struct player_horizontal : public lgn::app::input_axis<player_horizontal> {};
 struct player_vertical : public lgn::app::input_axis<player_vertical> {};
 struct player_shoot : public lgn::app::input_action<player_shoot> {};
+struct player_melee : public lgn::app::input_action<player_melee> {};
 
-enum PlayerAnimState
+enum struct player_anim_state
 {
     IDLE,
     WALK,
@@ -21,18 +22,17 @@ enum PlayerAnimState
 using namespace lgn;
 class PlayerSystem final : public legion::System<PlayerSystem>
 {
-    ecs::filter<player_comp> players;
     ecs::filter<position, rotation, scale, rendering::camera > cameras;
     ecs::entity player;
     ecs::entity camera;
 
-    PlayerAnimState animState = PlayerAnimState::IDLE;
+    player_anim_state animState = player_anim_state::IDLE;
 
     std::unordered_map<id_type, key_frame_list> animations;
 
     math::vec2 movement;
     float speed = 10.f;
-    bool shooting = false;
+    bool canShoot = true;
 
 public:
     void setup();
@@ -42,11 +42,14 @@ public:
         lgn::log::debug("PlayerSystem shutdown");
     }
 
+    void move();
+
     void onShoot(player_shoot& action);
+    void onMelee(player_melee& action);
     void shoot();
     void horizontal_move(player_horizontal& axis);
     void vertical_move(player_vertical& axis);
 
-    void resolveAnimationState();
+    void setAnimationState(player_anim_state state);
     void stopCurrentAnim();
 };

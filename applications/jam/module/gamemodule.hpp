@@ -28,9 +28,9 @@ public:
 
         reportSystem<PhysicsSystem>();
         reportSystem<GameSystem>();
-        reportSystem<SimpleCameraController>();
+        //reportSystem<SimpleCameraController>();
         reportSystem<BulletSystem>();
-        //reportSystem<EnemySystem>();
+        reportSystem<EnemySystem>();
         reportSystem<PlayerSystem>();
         reportSystem<KillableSystem>();
         //reportSystem<CameraFollowSystem>();

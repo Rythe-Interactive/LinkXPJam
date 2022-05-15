@@ -120,9 +120,10 @@ void AnimatedMeshRenderStage::render(app::window& context, L_MAYBEUNUSED camera&
                 {
                     if (!renderer.looping)
                         renderer.playing = false;
-                    else
-                        renderer.currentFrame = 0ull;
+
+                    renderer.currentFrame = 0ull;
                 }
+                renderer.onAnimFrameSwitch(renderer.currentFrame);
             }
         }
 

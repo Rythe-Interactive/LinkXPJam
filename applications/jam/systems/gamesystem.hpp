@@ -26,7 +26,7 @@ struct vsync_action : public lgn::app::input_action<vsync_action> {};
 class GameSystem final : public legion::System<GameSystem>
 {
 public:
-    lgn::ecs::entity player;
+    static lgn::ecs::entity core;
 
     std::unordered_map<id_type, key_frame_list> animations;
     
@@ -34,8 +34,10 @@ public:
     float linearMovement = 300.f;
     float radialMovement = 10.f;
     bool escaped = false;
+    float deltaTime;
 
     void setup();
+    void update(time::span dt);
     void onGUI(app::window& context, gfx::camera& cam, const gfx::camera::camera_input& camInput, time::span deltaTime);
 
     void onCollision(collision& event);

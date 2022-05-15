@@ -2,6 +2,7 @@
 #include "gui_test.hpp"
 #include <rendering/debugrendering.hpp>
 #include "../components/components.hpp"
+#include "gamesystem.hpp"
 
 void EnemySystem::setup()
 {
@@ -11,7 +12,7 @@ void EnemySystem::setup()
 
 void EnemySystem::fixedUpdate(lgn::time::span dt)
 {
-    for (auto ent : players)
+    for (auto& ent : players)
     {
         player = ent;
     }
@@ -29,11 +30,12 @@ void EnemySystem::fixedUpdate(lgn::time::span dt)
         }
     }
 
-    for (auto ent : enemies)
+    position& playerPos = player.get_component<position>();
+    auto& corePos = *GameSystem::core.get_component<position>();
+    for (auto& ent : enemies)
     {
         enemy_comp enemyComp = ent.get_component<enemy_comp>();
         position& pos = ent.get_component<position>();
-        position& playerPos = player.get_component<position>();
 
         velocity sumVel = math::vec3::zero;;
 
@@ -53,8 +55,12 @@ void EnemySystem::fixedUpdate(lgn::time::span dt)
         if (math::length(static_cast<math::vec3>(sumVel)) > 0.0f)
             sumVel = math::normalize(sumVel) * enemyComp.speed;
 
-        //if (math::distance(playerPos, static_cast<math::vec3>(pos)) > 1.f)
-            //sumVel += math::normalize(playerPos - pos) * enemyComp.speed;
+        float playerDist = math::length2(playerPos - pos);
+        float coreDist = math::length2(corePos - pos);
+        if (playerDist < coreDist)
+            sumVel += math::normalize(playerPos - pos) * enemyComp.speed;
+        else
+            sumVel += math::normalize(corePos - pos) * enemyComp.speed;
 
         if (math::length(static_cast<math::vec3>(sumVel)) > 0.0f)
         {
@@ -81,12 +87,11 @@ void EnemySystem::spawnEnemy()
 
     collider& col = ent.add_component<collider>();
     col.add_shape<SphereCollider>();
+    col.layer = 2;
 
     ent.add_component(animated_mesh_renderer(gfx::MaterialCache::get_material("default"), key_frame_list{
-    { gfx::ModelCache::create_model("Sphere", "assets://models/sphere.obj"_view), 0.5f },
-    { gfx::ModelCache::create_model("UV Sphere", "assets://models/uvsphere.obj"_view), 0.5f },
-    { gfx::ModelCache::create_model("Cube", "assets://models/cube.glb"_view), 0.5f },
-    { gfx::ModelCache::create_model("UV Sphere", "assets://models/uvsphere.obj"_view), 0.5f }
+    { gfx::ModelCache::create_model("enemy0", "assets://models/sphere.obj"_view), 0.25f },
+    { gfx::ModelCache::create_model("enemy0", "assets://models/uvsphere.obj"_view), 0.25f },
         }));
 
 }

@@ -5,8 +5,8 @@
 struct [[reflectable]] enemy_comp
 {
     legion::core::id_type target = 0;
-    float speed = 5.f;
-    float initHealth = 20.0f;
+    float speed = 3.f;
+    float initHealth = 6.f;
     bool hunt = false;
     bool running = false;
 };
