@@ -91,7 +91,7 @@ void EnemySystem::spawnEnemy()
 
     ent.add_component(animated_mesh_renderer(gfx::MaterialCache::get_material("default"), key_frame_list{
     { gfx::ModelCache::create_model("enemy0", "assets://models/sphere.obj"_view), 0.25f },
-    { gfx::ModelCache::create_model("enemy0", "assets://models/uvsphere.obj"_view), 0.25f },
+    { gfx::ModelCache::create_model("enemy1", "assets://models/uvsphere.obj"_view), 0.25f },
         }));
 
 }
