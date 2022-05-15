@@ -16,17 +16,27 @@ void PlayerSystem::setup()
     player_comp& playerComp = player.add_component<player_comp>();
     killable& k = player.add_component<killable>();
     k.health = playerComp.initHealth;
-    animated_mesh_renderer& anim = player.add_component(animated_mesh_renderer(gfx::MaterialCache::get_material("default"), key_frame_list{
-                { gfx::ModelCache::create_model("Player0", fs::view("assets://models/player0.glb")), 0.05f },
-                { gfx::ModelCache::create_model("Player1", fs::view("assets://models/player1.glb")), 0.05f },
-                { gfx::ModelCache::create_model("Player2", fs::view("assets://models/player2.glb")), 0.05f },
-                { gfx::ModelCache::create_model("Player3", fs::view("assets://models/player3.glb")), 0.05f },
-                { gfx::ModelCache::create_model("Player4", fs::view("assets://models/player4.glb")), 0.05f },
-                { gfx::ModelCache::create_model("Player5", fs::view("assets://models/player5.glb")), 0.05f },
-                { gfx::ModelCache::create_model("Player6", fs::view("assets://models/player6.glb")), 0.05f }
-        }));
-
-    //anim.playing = false;
+    animations.emplace(nameHash("player_idle"), key_frame_list{
+                { gfx::ModelCache::create_model("player_idle0", fs::view("assets://models/player/idle/player_idle0.glb")), 0.05f },
+        });
+    animations.emplace(nameHash("player_melee"), key_frame_list{
+            { gfx::ModelCache::create_model("player_melee0", fs::view("assets://models/player/melee/player_melee0.glb")), 0.05f },
+            { gfx::ModelCache::create_model("player_melee1", fs::view("assets://models/player/melee/player_melee1.glb")), 0.05f },
+            { gfx::ModelCache::create_model("player_melee2", fs::view("assets://models/player/melee/player_melee2.glb")), 0.05f },
+            { gfx::ModelCache::create_model("player_melee3", fs::view("assets://models/player/melee/player_melee3.glb")), 0.05f },
+            { gfx::ModelCache::create_model("player_melee4", fs::view("assets://models/player/melee/player_melee4.glb")), 0.05f },
+            { gfx::ModelCache::create_model("player_melee5", fs::view("assets://models/player/melee/player_melee5.glb")), 0.05f },
+            { gfx::ModelCache::create_model("player_melee6", fs::view("assets://models/player/melee/player_melee6.glb")), 0.05f }
+        });
+    animations.emplace(nameHash("player_shoot"), key_frame_list{
+        { gfx::ModelCache::create_model("player_shoot0", fs::view("assets://models/player/shoot/player_shoot0.glb")), 0.05f },
+        { gfx::ModelCache::create_model("player_shoot1", fs::view("assets://models/player/shoot/player_shoot1.glb")), 0.05f },
+        { gfx::ModelCache::create_model("player_shoot2", fs::view("assets://models/player/shoot/player_shoot2.glb")), 0.05f },
+        { gfx::ModelCache::create_model("player_shoot3", fs::view("assets://models/player/shoot/player_shoot3.glb")), 0.05f },
+        { gfx::ModelCache::create_model("player_shoot4", fs::view("assets://models/player/shoot/player_shoot4.glb")), 0.05f }
+        });
+    animated_mesh_renderer& animationAvatar = player.add_component(animated_mesh_renderer(gfx::MaterialCache::get_material("default"), animations[nameHash("player_idle")]));
+    animationAvatar.playing = false;
 
     if (!cameras.empty())
     {
@@ -79,7 +89,54 @@ void PlayerSystem::fixedUpdate(lgn::time::span deltaTime)
 
         if (shooting)
             shoot();
+
+        resolveAnimationState();
     }
+}
+
+void PlayerSystem::resolveAnimationState()
+{
+    animated_mesh_renderer& anim = player.get_component<animated_mesh_renderer>();
+
+    if (animState == PlayerAnimState::IDLE)
+    {
+        anim.keyFrames = animations[nameHash("player_idle")];
+        anim.playing = true;
+        anim.looping = false;
+        return;
+    }
+
+    if (animState == PlayerAnimState::WALK)
+    {
+        anim.keyFrames = animations[nameHash("player_walk")];
+        anim.playing = true;
+        anim.looping = true;
+        return;
+    }
+
+    if (animState == PlayerAnimState::SHOOT)
+    {
+        anim.keyFrames = animations[nameHash("player_shoot")];
+        anim.playing = true;
+        anim.looping = false;
+        return;
+    }
+
+    if (animState == PlayerAnimState::MELEE)
+    {
+        anim.keyFrames = animations[nameHash("player_melee")];
+        anim.playing = true;
+        anim.looping = false;
+        return;
+    }
+}
+
+void PlayerSystem::stopCurrentAnim()
+{
+    animated_mesh_renderer& anim = player.get_component<animated_mesh_renderer>();
+    anim.playing = false;
+    anim.looping = false;
+    animState = PlayerAnimState::IDLE;
 }
 
 void PlayerSystem::onShoot(player_shoot& action)
@@ -89,6 +146,7 @@ void PlayerSystem::onShoot(player_shoot& action)
 
 void PlayerSystem::shoot()
 {
+    animState = PlayerAnimState::SHOOT;
     auto bullet = createEntity("Bullet");
     bullet.add_component<bullet_comp>();
     position& pos = bullet.add_component<position>();
@@ -109,11 +167,19 @@ void PlayerSystem::shoot()
 
 void PlayerSystem::horizontal_move(player_horizontal& axis)
 {
-    movement.x = axis.value * speed;
+    if (axis.value > 0.f || axis.value < 0.f)
+    {
+        movement.x = axis.value * speed;
+        animState = PlayerAnimState::IDLE;
+    }
 }
 
 void PlayerSystem::vertical_move(player_vertical& axis)
 {
-    movement.y = axis.value * speed;
+    if (axis.value > 0.f || axis.value < 0.f)
+    {
+        movement.y = axis.value * speed;
+        animState = PlayerAnimState::IDLE;
+    }
 }
 

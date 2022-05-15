@@ -10627,7 +10627,7 @@ void ImGui::ShowMetricsWindow(bool* p_open)
     }
 
     // Misc Details
-    if (TreeNode("Internal state"))
+    if (TreeNode("Internal animState"))
     {
         const char* input_source_names[] = { "None", "Mouse", "Nav", "NavKeyboard", "NavGamepad" }; IM_ASSERT(IM_ARRAYSIZE(input_source_names) == ImGuiInputSource_COUNT);
 

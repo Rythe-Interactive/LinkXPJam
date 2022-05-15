@@ -118,9 +118,10 @@ void AnimatedMeshRenderStage::render(app::window& context, L_MAYBEUNUSED camera&
                 renderer.currentFrame++;
                 if (renderer.currentFrame >= renderer.keyFrames.size())
                 {
-                    renderer.currentFrame = 0ull;
                     if (!renderer.looping)
                         renderer.playing = false;
+                    else
+                        renderer.currentFrame = 0ull;
                 }
             }
         }
