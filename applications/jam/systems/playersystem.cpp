@@ -45,7 +45,7 @@ void PlayerSystem::setup()
         { gfx::ModelCache::create_model("player_shoot3", fs::view("assets://models/player/shoot/player_shoot3.glb")), 0.05f },
         { gfx::ModelCache::create_model("player_shoot4", fs::view("assets://models/player/shoot/player_shoot4.glb")), 0.05f }
         });
-    animated_mesh_renderer& animationAvatar = player.add_component(animated_mesh_renderer(gfx::MaterialCache::get_material("default"), animations[nameHash("player_idle")]));
+    animated_mesh_renderer& animationAvatar = player.add_component(animated_mesh_renderer(gfx::MaterialCache::get_material("playerMat"), animations[nameHash("player_idle")]));
     animationAvatar.playing = false;
 
     if (!cameras.empty())
