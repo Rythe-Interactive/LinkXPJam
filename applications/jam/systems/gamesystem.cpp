@@ -93,29 +93,33 @@ void GameSystem::setup()
         }
     }
 
-    auto camera = createEntity("Camera");
-    camera.add_component<transform>(position(0.f, 20.f, 0.f), rotation::lookat(position(0.f, 20.f, 0.f), math::vec3(0.f, 0.f, 0.0001f), math::vec3::up), scale());
-    camera.add_component<audio::audio_listener>();
+    {
+        auto camera = createEntity("Camera");
+        camera.add_component<transform>(position(0.f, 20.f, 0.f), rotation::lookat(position(0.f, 20.f, 0.f), math::vec3(0.f, 0.f, 0.0001f), math::vec3::up), scale());
+        camera.add_component<audio::audio_listener>();
 
-    rendering::camera cam;
-    cam.set_projection(60.f, 0.001f, 1000.f);
-    camera.add_component<gfx::camera>(cam);
+        rendering::camera cam;
+        cam.set_projection(60.f, 0.001f, 1000.f);
+        camera.add_component<gfx::camera>(cam);
 
-    core = createEntity();
-    position& pos = core.add_component<position>();
-    core.add_component<rotation>();
-    core.add_component<scale>();
-    auto& rb = *core.add_component<rigidbody>();
-    rb.setMass(1000.f);
-    rb.linearDrag = 0.9f;
-    killable& k = core.add_component<killable>();
-    k.health = 100.f;
-    core.add_component(gfx::mesh_renderer{ gfx::MaterialCache::get_material("default"), rendering::ModelCache::create_model("Sphere", "assets://models/sphere.obj"_view) });
+        core = createEntity();
+        position& pos = core.add_component<position>();
+        core.add_component<rotation>();
+        core.add_component<scale>();
+        auto& rb = *core.add_component<rigidbody>();
+        rb.setMass(1000.f);
+        rb.linearDrag = 0.9f;
+        killable& k = core.add_component<killable>();
+        k.health = 100.f;
+        auto mat = gfx::MaterialCache::create_material("coreTexture", fs::view("assets://shaders/texture.shs"));
+        mat.set_param("_texture", gfx::TextureCache::create_texture(fs::view("assets://textures/core.png")));
+        core.add_component(gfx::mesh_renderer{ mat, rendering::ModelCache::create_model("Core", "assets://models/plane.obj"_view) });
 
-    collider& col = core.add_component<collider>();
-    col.layer = 0;
-    col.ignoreMask = 0;
-    col.add_shape<SphereCollider>();
+        collider& col = core.add_component<collider>();
+        col.layer = 0;
+        col.ignoreMask = 0;
+        col.add_shape<SphereCollider>();
+    }
 
     bindToEvent<collision, &GameSystem::onCollision>();
 }
