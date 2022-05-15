@@ -47,10 +47,12 @@ void GameSystem::setup()
         ecs::world.add_component(gfx::skybox_renderer{ skyboxMat });
 
         auto groundplane = createEntity("Ground Plane");
-        auto groundmat = rendering::MaterialCache::create_material("floor", "assets://shaders/groundplane.shs"_view);
-        groundmat.set_param("floorTile", rendering::TextureCache::create_texture("floorTile", "engine://resources/default/tile.png"_view));
+        auto groundmat = rendering::MaterialCache::create_material("floor", "assets://shaders/texture.shs"_view);
+        groundmat.set_param("_texture", rendering::TextureCache::create_texture("floorTile", "assets://textures/big_room_red.png"_view));
         groundplane.add_component(gfx::mesh_renderer{ groundmat, rendering::ModelCache::create_model("floor", "assets://models/plane.obj"_view) });
         groundplane.add_component<transform>();
+        groundplane.get_component<position>() = position(0.f, -2.f, 0.f);
+        groundplane.get_component<scale>() = scale(30.f, 1.f, 20.f);
 
         {
             audio::AudioSegmentCache::createAudioSegment("Explosion", fs::view("assets://audio/fx/Explosion2.wav"));
@@ -69,6 +71,25 @@ void GameSystem::setup()
             mat.set_param(SV_MRDAO, mrdao);
             mat.set_param(SV_NORMALHEIGHT, normalHeight);
             mat.set_param(SV_HEIGHTSCALE, 1.f);
+        }
+
+        {
+            auto mat = gfx::MaterialCache::create_material("playerMat", fs::view("engine://shaders/default_lit.shs"));
+            auto color = gfx::TextureCache::create_texture(fs::view("assets://textures/player/Base_color.png"));
+            auto height = gfx::TextureCache::create_texture(fs::view("assets://textures/player/Height.png"));
+            auto metallic = gfx::TextureCache::create_texture(fs::view("assets://textures/player/Metallic.png"));
+            auto roughness = gfx::TextureCache::create_texture(fs::view("assets://textures/player/Roughness.png"));
+            auto normal = gfx::TextureCache::create_texture(fs::view("assets://textures/player/Normal.png"));
+            mat.set_param("useAlbedoTex", true);
+            mat.set_param("albedoTex", color);
+            mat.set_param("useMetallicTex", true);
+            mat.set_param("metallicTex", metallic);
+            mat.set_param("useRoughnessTex", true);
+            mat.set_param("roughnessTex", roughness);
+            mat.set_param("useNormal", true);
+            mat.set_param("normalTex", normal);
+            mat.set_param("useHeight", true);
+            mat.set_param("heightTex", height);
         }
     }
 
@@ -103,18 +124,6 @@ void GameSystem::update(time::span dt)
 {
     deltaTime = dt;
 }
-
-//key_frame_list& GameSystem::create_animation(const std::string& name, key_frame_list keyFrames)
-//{
-//    //id_type id = nameHash(name);
-//
-//    //animations.emplace(id, keyFrames);
-//}
-//
-//key_frame_list& GameSystem::get_animation(const std::string& name)
-//{
-//
-//}
 
 void GameSystem::onGUI(app::window& context, L_MAYBEUNUSED gfx::camera& cam, L_MAYBEUNUSED const gfx::camera::camera_input& camInput, time::span deltaTime)
 {
